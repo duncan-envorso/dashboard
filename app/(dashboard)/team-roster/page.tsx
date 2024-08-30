@@ -10,7 +10,6 @@ import DevicePreview from '../../../components/notifications/DevicePreview';
 
 export interface MessageConfig {
   layout: 'modal' | 'image' | 'banner';
-  background: string;
   textColor: string;
   title: string;
   body: string;
@@ -23,12 +22,12 @@ export interface MessageConfig {
 const MessageCustomizer: React.FC = () => {
   const [config, setConfig] = useState<MessageConfig>({
     layout: 'modal',
-    background: '#ffffff',
+   
     textColor: '#000000',
-    title: 'Share This Cat',
-    body: 'Thanks for the ❤️! Why not share this kitty with a friend?',
-    imageUrl: '',
-    buttonText: 'Share Kitty',
+    title: 'Back of the Year 2024',
+    body: 'TReece MacDonald: Major League Rugby Back of the Year 2024',
+    imageUrl: 'https://freejacks.com/wp-content/uploads/2024/08/Reece-1.jpg',
+    buttonText: 'Share',
     buttonBackground: '#fb0055',
     buttonTextColor: '#ffffff',
   });
@@ -43,7 +42,6 @@ const MessageCustomizer: React.FC = () => {
         <h2 className="text-2xl font-bold">Message Layout</h2>
         <Layout layout={config.layout} setLayout={(layout) => updateConfig('layout', layout)} />
         <div className="space-y-4">
-          <ColorPicker label="Background" value={config.background} onChange={(value) => updateConfig('background', value)} />
           <ColorPicker label="Text color" value={config.textColor} onChange={(value) => updateConfig('textColor', value)} />
           <TextInput label="Title" value={config.title} onChange={(value) => updateConfig('title', value)} />
           <TextInput label="Body" value={config.body} onChange={(value) => updateConfig('body', value)} multiline />

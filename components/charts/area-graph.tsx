@@ -39,7 +39,7 @@ const chartConfig = {
 
 export function AreaGraph() {
   return (
-    <Card>
+    <Card className='m-5' >
       <CardHeader>
         <CardTitle>Area Chart - Stacked</CardTitle>
         <CardDescription>
