@@ -28,7 +28,7 @@ const DevicePreview: React.FC<DevicePreviewProps> = ({ deviceType, setDeviceType
       </div>
     </TabsContent>
     <TabsContent value="Horisontal" className="mt-4">
-      <div className="w-[600px] h-[300px] mx-auto border-4 border-gray-900 rounded-3xl p-4 relative">
+      <div className="w-[600px] h-[300px] mx-auto border-4 border-gray-200 rounded-3xl p-4 relative">
         <PreviewContent config={config} comments={comments} />
       </div>
     </TabsContent>

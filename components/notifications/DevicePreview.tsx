@@ -23,6 +23,7 @@ const DevicePreview: React.FC<DevicePreviewProps> = ({ config }) => {
       <Image src={config.imageUrl} width={400} height={300} alt="Preview" className=" rounded-lg mb-2" />
       <p className="text-sm text-center mb-4" style={{ color: config.textColor }}>{config.body}</p>
       <Button style={{ backgroundColor: config.buttonBackground, color: config.buttonTextColor }}>{config.buttonText}</Button>
+      <p className="text-xs mt-2">Topic: {config.topic}</p>
     </div>
   );
 
@@ -54,6 +55,7 @@ const DevicePreview: React.FC<DevicePreviewProps> = ({ config }) => {
                     <h3 className="text-lg font-bold mb-2" style={{ color: config.textColor }}>{config.title}</h3>
                     <p className="text-sm mb-4" style={{ color: config.textColor }}>{config.body}</p>
                     <Button style={{ backgroundColor: config.buttonBackground, color: config.buttonTextColor }}>{config.buttonText}</Button>
+                    <p className="text-xs mt-2">Topic: {config.topic}</p>
                   </div>
                 </div>
               </div>
