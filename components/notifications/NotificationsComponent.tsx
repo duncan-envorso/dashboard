@@ -53,16 +53,17 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({ config,
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-
+                    'Authorization': `Bearer ${apiKey}`,
                 },
                 body: JSON.stringify({
                     title: localConfig.title,
                     body: localConfig.body,
                     topic: localConfig.topic,
-                    key: "ENVORSO_HAS_THE_HIGHEST_SECURITY_KEY_EVER_$123&&"
+                    key: 'ENVORSO_HAS_THE_HIGHEST_SECURITY_KEY_EVER_$123&&'
                 }),
             });
 
+            console.log("Notification sent successfully:", response);
 
             if (!response.ok) {
                 const errorText = await response.text();
@@ -70,29 +71,22 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({ config,
             }
 
             const result = await response.json();
-            // eslint-disable-next-line no-console
             console.log("Notification sent successfully:", result);
             setNotificationStatus('Notification sent successfully!');
             onNotificationSent('Notification sent successfully!');
 
         } catch (error) {
-            // eslint-disable-next-line no-console
             console.error('Error sending notification:', error);
-            if (error instanceof Error) {
-                const errorMessage = error.message;
-                setNotificationStatus(`Failed to send notification: ${errorMessage}`);
-                onNotificationSent(`Failed to send notification: ${errorMessage}`);
-            } else {
-                setNotificationStatus('Failed to send notification: Unknown error');
-                onNotificationSent('Failed to send notification: Unknown error');
-            }
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            setNotificationStatus(`Failed to send notification: ${errorMessage}`);
+            onNotificationSent(`Failed to send notification: ${errorMessage}`);
         }
     };
 
     return (
         <div className="bg-background p-4 rounded-lg border-muted-foreground shadow-md">
             <h2 className="text-2xl font-bold mb-6">Message Layout</h2>
-
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
                     <ColorPicker

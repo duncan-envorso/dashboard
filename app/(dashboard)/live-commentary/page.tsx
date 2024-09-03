@@ -41,6 +41,7 @@ export default function Component() {
     { id: 2, text: "Players are taking the field.", isLiveFeed: true },
   ])
   const [config, setConfig] = useState<MessageConfig>(initialConfig)
+  const [deviceType, setDeviceType] = useState<'phone' | 'Horisontal'>('phone')
 
   const addComment = (comment: string) => {
     setComments([...comments, { id: comments.length + 1, text: comment, isLiveFeed: false }])
@@ -48,35 +49,36 @@ export default function Component() {
 
   return (
     <div className="flex flex-col h-screen">
-      <CommentaryHeader />
-      <div className="flex-grow overflow-auto">
-        <div className="container mx-auto p-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Match Feed</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <DevicePreview
-               
-                config={config}
-                comments={comments}
-              />
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-      <div className="bg-background border-t">
-        <div className="container mx-auto p-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Add Commentary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Commentary onAddComment={addComment} />
-            </CardContent>
-          </Card>
-        </div>
+    <CommentaryHeader />
+    <div className="flex-grow overflow-auto">
+      <div className="container mx-auto p-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Live Match Feed</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DevicePreview
+              deviceType={deviceType}
+              setDeviceType={setDeviceType}
+              config={config}
+              comments={comments}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
+    <div className="bg-background border-t">
+      <div className="container mx-auto p-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle>Add Commentary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Commentary onAddComment={addComment} />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  </div>
   )
 }

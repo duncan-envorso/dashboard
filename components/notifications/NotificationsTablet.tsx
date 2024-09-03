@@ -95,10 +95,8 @@ const NotificationsTable: React.FC = () => {
 
       toast({
         title: 'Notification sent successfully',
-        description: response.statusText,
+        description: 'Your notification has been sent to the app',
       });
-
-      console.log(response.json());
 
       handleNotificationSent('Sent successfully', index);
     } catch (error) {
