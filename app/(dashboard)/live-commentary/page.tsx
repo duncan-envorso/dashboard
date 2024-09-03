@@ -41,7 +41,7 @@ export default function Component() {
     { id: 2, text: "Players are taking the field.", isLiveFeed: true },
   ])
   const [config, setConfig] = useState<MessageConfig>(initialConfig)
-  const [deviceType, setDeviceType] = useState<'phone' | 'Horisontal'>('phone')
+  const [deviceType, setDeviceType] = useState<'phone'>('phone')
 
   const addComment = (comment: string) => {
     setComments([...comments, { id: comments.length + 1, text: comment, isLiveFeed: false }])
