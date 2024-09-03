@@ -98,6 +98,8 @@ const NotificationsTable: React.FC = () => {
         description: response.statusText,
       });
 
+      console.log(response.json());
+
       handleNotificationSent('Sent successfully', index);
     } catch (error) {
       if (error instanceof Error) {
