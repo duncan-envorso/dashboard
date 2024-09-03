@@ -17,6 +17,7 @@ export interface MessageConfig {
   buttonText: string;
   buttonBackground: string;
   buttonTextColor: string;
+  topic: string;
 }
 
 const MessageCustomizer: React.FC = () => {
@@ -30,6 +31,7 @@ const MessageCustomizer: React.FC = () => {
     buttonText: 'Share',
     buttonBackground: '#fb0055',
     buttonTextColor: '#ffffff',
+    topic: 'miscelaneous',
   });
 
   const updateConfig = (key: keyof MessageConfig, value: string) => {

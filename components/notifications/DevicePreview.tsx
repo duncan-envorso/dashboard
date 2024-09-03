@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { X } from 'lucide-react';
 import Image from 'next/image';
 import { MessageConfig } from './NotificationsComponent';
@@ -12,7 +11,6 @@ interface DevicePreviewProps {
 }
 
 const DevicePreview: React.FC<DevicePreviewProps> = ({ config }) => {
-  const [deviceType, setDeviceType] = useState<'phone' >('phone');
 
   const PreviewContent = () => (
     <div className="bg-white rounded-lg shadow-lg p-4 absolute inset-4 flex flex-col items-center">
@@ -30,10 +28,8 @@ const DevicePreview: React.FC<DevicePreviewProps> = ({ config }) => {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Device Preview</h2>
-      <div className={`w-[300px] h-[600px] mx-auto border-4 border-gray-900 rounded-3xl p-4 relative ${deviceType === 'phone' ? '' : 'hidden'}`}>
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-gray-900 rounded-b-xl"></div>
-            {config.layout === 'modal' && <PreviewContent />}
-          </div>
+      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-gray-900 rounded-b-xl"></div>
+      {config.layout === 'modal' && <PreviewContent />}
     </div>
   );
 };
