@@ -23,8 +23,11 @@ const initialNotifications: NotificationWithStatus[] = [
     buttonText: 'Share',
     buttonBackground: '#fb0055',
     buttonTextColor: '#ffffff',
-    topic: 'miscelaneous',
+    topic: 'miscellaneous',
     status: null,
+    teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
+    modalType: 'Modal',
+    expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   },
   // Add more initial notifications if needed
 ];
@@ -54,11 +57,21 @@ const NotificationsTable: React.FC = () => {
     if (selectedNotification) {
       // Edit existing notification
       setNotifications(prev =>
-        prev.map(notif => (notif === selectedNotification ? { ...updatedNotification, status: notif.status } : notif))
+        prev.map(notif => (notif === selectedNotification ? { 
+          ...updatedNotification, 
+          status: notif.status,
+          modalType: updatedNotification.layout.charAt(0).toUpperCase() + updatedNotification.layout.slice(1),
+          expirationDate: updatedNotification.expirationDate || new Date().toISOString()
+        } as NotificationWithStatus : notif))
       );
     } else {
       // Add new notification
-      setNotifications(prev => [...prev, { ...updatedNotification, status: null }]);
+      setNotifications(prev => [...prev, { 
+        ...updatedNotification, 
+        status: null,
+        modalType: updatedNotification.layout.charAt(0).toUpperCase() + updatedNotification.layout.slice(1),
+        expirationDate: updatedNotification.expirationDate || new Date().toISOString()
+      } as NotificationWithStatus]);
     }
     setIsDialogOpen(false);
   };
@@ -70,36 +83,44 @@ const NotificationsTable: React.FC = () => {
   const handleSend = async (notification: NotificationWithStatus, index: number) => {
     try {
       const apiKey = process.env.NEXT_PUBLIC_NOTIFICATION_KEY;
+      const teamId = "034db172-942f-48b8-bc91-a0b3eb3a025f"; // Hardcoded teamId
       if (!apiKey) {
         throw new Error('API key is missing');
       }
 
-      const response = await fetch('https://api.seawolves.envorso.com/v1/panel/notifications?teamId=034db172-942f-48b8-bc91-a0b3eb3a025f', {
+      const response = await fetch('https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=3fa85f64-5717-4562-b3fc-2c963f66afa6', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Origin': window.location.origin,
         },
         body: JSON.stringify({
+          teamId: teamId,
+          modalType: notification.layout.charAt(0).toUpperCase() + notification.layout.slice(1), // Capitalize first letter
+          expirationDate: notification.expirationDate,
           title: notification.title,
+          image_url: notification.imageUrl,
           body: notification.body,
-          topic: notification.topic,
-          key: 'ENVORSO_HAS_THE_HIGHEST_SECURITY_KEY_EVER_$123&&'
+          button_text: notification.buttonText,
+          text_color: notification.textColor,
+          background_color: notification.buttonBackground,
+          button_text_color: notification.buttonTextColor,
+          button_background_color: notification.buttonBackground
         }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to send notification: ${response.status} ${response.statusText}. ${errorText}`);
+        throw new Error(`Failed to send in-app modal: ${response.status} ${response.statusText}. ${errorText}`);
       }
 
       toast({
-        title: 'Notification sent successfully',
-        description: 'Your notification has been sent to the app',
+        title: 'In-app modal sent successfully',
+        description: 'Your in-app modal has been sent to the app',
       });
 
       handleNotificationSent('Sent successfully', index);
     } catch (error) {
+      console.error('Error sending in-app modal:', error);
       if (error instanceof Error) {
         handleNotificationSent(`Failed: ${error.message}`, index);
       } else {
@@ -113,8 +134,8 @@ const NotificationsTable: React.FC = () => {
       <NotifcationsHeader handleAdd={handleAdd} />
       <Card className='m-5'>
         <CardHeader>
-          <CardTitle>Notifications</CardTitle>
-          <CardDescription>Create Notifications to push to the app</CardDescription>
+          <CardTitle>In-App Notifications</CardTitle>
+          <CardDescription>Create and manage in-app notifications</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -122,8 +143,8 @@ const NotificationsTable: React.FC = () => {
               <TableRow>
                 <TableHead>Title</TableHead>
                 <TableHead>Button Text</TableHead>
-                <TableHead>Layout</TableHead>
-                <TableHead>Published At</TableHead>
+                <TableHead>Layout Type</TableHead>
+                <TableHead>Expiration Date</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -134,7 +155,13 @@ const NotificationsTable: React.FC = () => {
                   <TableCell>{notification.title}</TableCell>
                   <TableCell>{notification.buttonText}</TableCell>
                   <TableCell>{notification.layout}</TableCell>
-                  <TableCell>{new Date().toLocaleDateString()}</TableCell>
+                  <TableCell>{notification.expirationDate ? 
+                    // Use a client-side only rendering for the date
+                    <span suppressHydrationWarning>
+                      {new Date(notification.expirationDate).toLocaleString()}
+                    </span> 
+                    : 'N/A'}
+                  </TableCell>
                   <TableCell>{notification.status || 'Not sent'}</TableCell>
                   <TableCell>
                     <Button onClick={() => handleEdit(notification)} variant="outline" className="mr-2">
@@ -153,20 +180,10 @@ const NotificationsTable: React.FC = () => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle>{selectedNotification ? 'Edit Notification' : 'Add Notification'}</DialogTitle>
+              <DialogTitle>{selectedNotification ? 'Edit In-App Notification' : 'Add In-App Notification'}</DialogTitle>
             </DialogHeader>
             <NotificationsComponent
-              config={selectedNotification || {
-                layout: 'modal',
-                textColor: '#000000',
-                title: '',
-                body: '',
-                topic: '',
-                imageUrl: '',
-                buttonText: '',
-                buttonBackground: '#fb0055',
-                buttonTextColor: '#ffffff',
-              }}
+              config={selectedNotification as MessageConfig}
               onSave={(updatedConfig: MessageConfig) => {
                 handleSave(updatedConfig);
                 handleCloseDialog();

@@ -9,7 +9,7 @@ import ButtonCustomizer from '../../../components/notifications/ButtonCustomizer
 import DevicePreview from '../../../components/notifications/DevicePreview';
 
 export interface MessageConfig {
-  layout: 'modal' | 'image' | 'banner';
+  layout: 'modal' | 'image' | 'toast';
   textColor: string;
   title: string;
   body: string;

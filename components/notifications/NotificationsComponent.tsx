@@ -7,9 +7,13 @@ import ImageInput from './ImageInput';
 import ButtonCustomizer from './ButtonCustomizer';
 import DevicePreview from './DevicePreview';
 import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { DatePicker } from './DatePicker';
 
 export interface MessageConfig {
-    layout: 'modal' | 'image' | 'banner';
+    teamId: string;
+    layout: 'modal' | 'image' | 'toast';
     textColor: string;
     title: string;
     body: string;
@@ -17,25 +21,47 @@ export interface MessageConfig {
     buttonText: string;
     buttonBackground: string;
     buttonTextColor: string;
-    topic: string;  // Add this line
+    topic?: string;
+    modalType?: 'Modal';
+    expirationDate?: string;
 }
 
 interface NotificationsComponentProps {
-    config: MessageConfig;
+    config?: Partial<MessageConfig>;
     onSave: (config: MessageConfig) => void;
     teamId: string;
     onNotificationSent: (status: string) => void;
 }
 
+const defaultConfig: MessageConfig = {
+    layout: 'modal',
+    teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
+    textColor: '#000000',
+    title: '',
+    body: '',
+    imageUrl: '',
+    buttonText: '',
+    buttonBackground: '#000000',
+    buttonTextColor: '#ffffff',
+    topic: 'miscellaneous',
+    modalType: 'Modal',
+    expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+
+};
+
 const NotificationsComponent: React.FC<NotificationsComponentProps> = ({ config, onSave, teamId, onNotificationSent }) => {
     const [localConfig, setLocalConfig] = useState<MessageConfig>({
-        ...config,
-        topic: config.topic || 'miscelaneous'  // Set default topic
+        ...defaultConfig,
+        ...config
     });
+
     const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
 
-    const updateConfig = (key: keyof MessageConfig, value: string) => {
-        setLocalConfig(prev => ({ ...prev, [key]: value }));
+    const updateConfig = (key: keyof MessageConfig, value: string | Date | undefined) => {
+        setLocalConfig(prev => ({
+            ...prev,
+            [key]: key === 'expirationDate' && value instanceof Date ? value.toISOString() : value
+        }));
     };
 
     const handleSave = () => {
@@ -49,46 +75,71 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({ config,
                 throw new Error('API key is missing');
             }
 
-            const response = await fetch('https://api.seawolves.envorso.com/v1/panel/notifications?teamId=034db172-942f-48b8-bc91-a0b3eb3a025f', {
+            const response = await fetch('https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=3fa85f64-5717-4562-b3fc-2c963f66afa6', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${apiKey}`,
                 },
                 body: JSON.stringify({
+                    teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
+                    modalType: localConfig.modalType,
+                    expirationDate: localConfig.expirationDate,
                     title: localConfig.title,
+                    image_url: localConfig.imageUrl,
                     body: localConfig.body,
-                    topic: localConfig.topic,
-                    key: 'ENVORSO_HAS_THE_HIGHEST_SECURITY_KEY_EVER_$123&&'
+                    button_text: localConfig.buttonText,
+                    text_color: localConfig.textColor,
+                    background_color: localConfig.buttonBackground,
+                    button_text_color: localConfig.buttonTextColor,
+                    button_background_color: localConfig.buttonBackground
                 }),
             });
 
-            console.log("Notification sent successfully:", response);
-
             if (!response.ok) {
                 const errorText = await response.text();
-                throw new Error(`Failed to send notification: ${response.status} ${response.statusText}. ${errorText}`);
+                throw new Error(`Failed to send in-app modal: ${response.status} ${response.statusText}. ${errorText}`);
             }
 
             const result = await response.json();
-            console.log("Notification sent successfully:", result);
-            setNotificationStatus('Notification sent successfully!');
-            onNotificationSent('Notification sent successfully!');
+            console.log("In-app modal sent successfully:", result);
+            setNotificationStatus('In-app modal sent successfully!');
+            onNotificationSent('In-app modal sent successfully!');
 
         } catch (error) {
-            console.error('Error sending notification:', error);
+            console.error('Error sending in-app modal:', error);
             const errorMessage = error instanceof Error ? error.message : String(error);
-            setNotificationStatus(`Failed to send notification: ${errorMessage}`);
-            onNotificationSent(`Failed to send notification: ${errorMessage}`);
+            setNotificationStatus(`Failed to send in-app modal: ${errorMessage}`);
+            onNotificationSent(`Failed to send in-app modal: ${errorMessage}`);
         }
     };
 
     return (
         <div className="bg-background p-4 rounded-lg border-muted-foreground shadow-md">
-            <h2 className="text-2xl font-bold mb-6">Message Layout</h2>
-            
+            <h2 className="text-2xl font-bold mb-6">In-App Notification Configuration</h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
+                    <div className="space-y-2">
+                        <Label>Layout</Label>
+                        <RadioGroup
+                            value={localConfig.layout}
+                            onValueChange={(value) => updateConfig('layout', value as 'modal' | 'image' | 'toast')}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="modal" id="modal" />
+                                <Label htmlFor="modal">Modal</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="image" id="image" />
+                                <Label htmlFor="image">Image</Label>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <RadioGroupItem value="toast" id="toast" />
+                                <Label htmlFor="toast">Toast</Label>
+                            </div>
+                        </RadioGroup>
+                    </div>
                     <ColorPicker
                         label="Text color"
                         value={localConfig.textColor}
@@ -105,11 +156,6 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({ config,
                         onChange={(value) => updateConfig('body', value)}
                         multiline
                     />
-                    <TextInput
-                        label="Topic"
-                        value={localConfig.topic}
-                        onChange={(value) => updateConfig('topic', value)}
-                    />
                     <ImageInput
                         label="Image URL"
                         value={localConfig.imageUrl}
@@ -122,6 +168,10 @@ const NotificationsComponent: React.FC<NotificationsComponentProps> = ({ config,
                         onTextChange={(value) => updateConfig('buttonText', value)}
                         onBackgroundChange={(value) => updateConfig('buttonBackground', value)}
                         onTextColorChange={(value) => updateConfig('buttonTextColor', value)}
+                    />
+                    <DatePicker
+                        date={localConfig.expirationDate ? new Date(localConfig.expirationDate) : undefined}
+                        setDate={(date: Date | undefined) => updateConfig('expirationDate', date)}
                     />
                 </div>
                 <DevicePreview config={localConfig} />
