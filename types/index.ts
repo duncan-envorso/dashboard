@@ -30,3 +30,22 @@ export interface FooterItem {
 export type MainNavItem = NavItemWithOptionalChildren;
 
 export type SidebarNavItem = NavItemWithChildren;
+
+
+export interface MessageConfig {
+  teamId: string;
+  modalType: 'modal' | 'image' | 'toast';
+  textColor: string;
+  title: string;
+  body: string;
+  imageUrl: string;
+  buttonText: string;
+  buttonBackground: string;
+  buttonTextColor: string;
+  topic?: string;
+  expirationDate?: string;
+  scheduledDate?: string;
+  scheduledTime?: string;
+  timezone?: string;
+
+}

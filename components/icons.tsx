@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   ArrowRight,
+  Bell,
   Check,
   ChevronLeft,
   ChevronRight,
@@ -17,8 +18,10 @@ import {
   LogIn,
   LucideIcon,
   LucideProps,
+  MessageSquare,
   Moon,
   MoreVertical,
+  Newspaper,
   Pizza,
   Plus,
   Settings,
@@ -59,7 +62,10 @@ export const Icons = {
   pizza: Pizza,
   sun: SunMedium,
   moon: Moon,
+  messageSquare: MessageSquare,
   laptop: Laptop,
+  newspaper: Newspaper,
+  bell: Bell,
   gitHub: ({ ...props }: LucideProps) => (
     <svg
       aria-hidden="true"

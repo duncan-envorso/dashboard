@@ -10,7 +10,7 @@ const NewsArticleHeader: React.FC = () => {
         <header className="bg-background">
             <div className="flex items-center justify-between px-4 py-2">
                 <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
-                    <Link href="/dashboard" className="hover:text-primary">
+                    <Link href="/" className="hover:text-primary">
                         Dashboard
                     </Link>
                     <span>&gt;</span>

@@ -1,26 +1,53 @@
-import { AreaGraph } from '@/components/charts/area-graph';
-import { BarGraph } from '@/components/charts/bar-graph';
-import { PieGraph } from '@/components/charts/pie-graph';
+import React from 'react';
+import Link from 'next/link';
 import { CalendarDateRangePicker } from '@/components/date-range-picker';
 import PageContainer from '@/components/layout/page-container';
-import { RecentSales } from '@/components/recent-sales';
 import { Button } from '@/components/ui/button';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-  CardTitle
+  CardTitle,
+  CardFooter
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { LayoutDashboard, MessageSquare, Newspaper, Bell, Users, UserCog } from 'lucide-react';
 
-export default function page() {
+export default function Dashboard() {
+  const pages = [
+    {
+      title: "Live Commentary",
+      description: "Real-time match updates and commentary",
+      icon: <MessageSquare className="h-6 w-6" />,
+      link: "/live-commentary",
+    },
+    {
+      title: "News Articles",
+      description: "Latest news and articles about the team",
+      icon: <Newspaper className="h-6 w-6" />,
+      link: "/news-articles",
+    },
+    {
+      title: "Notifications",
+      description: "Manage and send notifications to users",
+      icon: <Bell className="h-6 w-6" />,
+      link: "/notifications",
+    },
+    {
+      title: "Team Roster",
+      description: "View and manage the team roster",
+      icon: <Users className="h-6 w-6" />,
+      link: "/team-roster",
+    },
+  ];
+
   return (
     <PageContainer scrollable={true}>
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className="flex items-center justify-between space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight">
-            Hi, Welcome back 👋
+          <h2 className="text-3xl font-bold tracking-tight">
+            Dashboard
           </h2>
           <div className="hidden items-center space-x-2 md:flex">
             <CalendarDateRangePicker />
@@ -36,129 +63,51 @@ export default function page() {
           </TabsList>
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              <Card className='m-5' >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Revenue
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">$45,231.89</div>
-                  <p className="text-xs text-muted-foreground">
-                    +20.1% from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className='m-5' >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Subscriptions
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+2350</div>
-                  <p className="text-xs text-muted-foreground">
-                    +180.1% from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className='m-5' >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Sales</CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <rect width="20" height="14" x="2" y="5" rx="2" />
-                    <path d="M2 10h20" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+12,234</div>
-                  <p className="text-xs text-muted-foreground">
-                    +19% from last month
-                  </p>
-                </CardContent>
-              </Card>
-              <Card className='m-5' >
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Active Now
-                  </CardTitle>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    className="h-4 w-4 text-muted-foreground"
-                  >
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                  </svg>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">+573</div>
-                  <p className="text-xs text-muted-foreground">
-                    +201 since last hour
-                  </p>
-                </CardContent>
-              </Card>
+              {pages.map((page) => (
+                <Card key={page.title} className="flex flex-col">
+                  <CardHeader>
+                    <div className="flex items-center space-x-2">
+                      {page.icon}
+                      <CardTitle>{page.title}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <CardDescription>{page.description}</CardDescription>
+                  </CardContent>
+                  <CardFooter>
+                    <Link href={page.link} passHref>
+                      <Button className="w-full">View</Button>
+                    </Link>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
-              <div className="col-span-4">
-                <BarGraph />
-              </div>
-              <Card className="col-span-4 md:col-span-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Recent Sales</CardTitle>
-                  <CardDescription>
-                    You made 265 sales this month.
-                  </CardDescription>
+                  <CardTitle>Live Commentary</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <RecentSales />
+                  <p>Latest comment: &quot;Match is about to begin!&quot;</p>
                 </CardContent>
               </Card>
-              <div className="col-span-4">
-                <AreaGraph />
-              </div>
-              <div className="col-span-4 md:col-span-3">
-                <PieGraph />
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>News Articles</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Latest article: &quot;Team`&apos;s Winning Streak Continues&quot;</p>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Notification</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p>Title: &ldquo;Back of the Year 2024&rdquo;</p>
+                  <p>Body: &ldquo;Reece MacDonald: Major League Rugby Back of the Year 2024&rdquo;</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
