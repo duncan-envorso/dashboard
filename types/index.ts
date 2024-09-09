@@ -34,7 +34,7 @@ export type SidebarNavItem = NavItemWithChildren;
 
 export interface MessageConfig {
   teamId: string;
-  modalType: 'modal' | 'image' | 'toast';
+  modalType: 'Modal' | 'Image' | 'Toast';
   textColor: string;
   title: string;
   body: string;
@@ -48,4 +48,10 @@ export interface MessageConfig {
   scheduledTime?: string;
   timezone?: string;
 
+}
+
+export interface NotifcationWithStatus extends MessageConfig {
+  createdAt: string | number | Date;
+  createdBy: string;
+  status: "scheduled" | "draft" | "failed" | "active" | "completed" | "canceled" | "completed";
 }

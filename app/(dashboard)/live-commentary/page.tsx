@@ -16,7 +16,7 @@ interface Comment {
 }
 
 interface MessageConfig {
-  layout: 'modal'
+  layout: 'Modal'
   title: string
   imageUrl: string
   buttonText: string
@@ -26,7 +26,7 @@ interface MessageConfig {
 }
 
 const initialConfig: MessageConfig = {
-  layout: 'modal',
+  layout: 'Modal',
   title: 'Live Rugby Match',
   imageUrl: '/placeholder.svg?height=300&width=400',
   buttonText: 'Watch Now',

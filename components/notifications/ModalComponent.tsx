@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -22,7 +22,7 @@ interface NotificationsComponentProps {
 }
 
 const defaultConfig: MessageConfig = {
-  modalType: 'modal',
+  modalType: 'Modal',
   teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
   textColor: '#000000',
   title: '',
@@ -32,8 +32,8 @@ const defaultConfig: MessageConfig = {
   buttonBackground: '#000000',
   buttonTextColor: '#ffffff',
   expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-  scheduledDate: new Date().toISOString(),
-  scheduledTime: '12:00',
+  scheduledDate: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
+  scheduledTime: new Date(Date.now() + 60 * 60 * 1000).toTimeString().slice(0, 5), // HH:MM format
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 };
 
@@ -43,6 +43,30 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
     ...config
   });
   const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
+  const [timeUntilSend, setTimeUntilSend] = useState<string>('');
+
+  useEffect(() => {
+    const updateTimeUntilSend = () => {
+      const now = new Date();
+      const scheduledDateTime = new Date(`${localConfig.scheduledDate?.split('T')[0]}T${localConfig.scheduledTime}`);
+      const diff = scheduledDateTime.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeUntilSend('Scheduled time has passed');
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        setTimeUntilSend(`Sending in ${hours}h ${minutes}m`);
+      }
+    };
+
+    updateTimeUntilSend();
+    const interval = setInterval(updateTimeUntilSend, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, [localConfig.scheduledDate, localConfig.scheduledTime]);
+
+
 
   const updateConfig = (key: keyof MessageConfig, value: string | Date | undefined) => {
     setLocalConfig(prev => ({
@@ -56,6 +80,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
   };
 
   const sendNotification = async () => {
+    console.log(localConfig)
     try {
       const apiKey = process.env.NEXT_PUBLIC_NOTIFICATION_KEY;
       if (!apiKey) {
@@ -72,6 +97,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
+
         body: JSON.stringify({
           teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
           modalType: localConfig.modalType,
@@ -94,6 +120,8 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
         throw new Error(`Failed to send in-app modal: ${response.status} ${response.statusText}. ${errorText}`);
       }
 
+
+
       const result = await response.json();
       console.log("In-app modal sent successfully:", result);
       setNotificationStatus('In-app modal sent successfully!');
@@ -107,69 +135,81 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
   };
 
   return (
-    <div className="bg-background w-full p-6 rounded-lg border border-border shadow-md">
-      <h2 className="text-2xl font-bold mb-6">In-App Notification Configuration</h2>
+    <div className="bg-white dark:bg-navy text-navy dark:text-white w-full p-4 rounded-lg border border-green shadow-sm">
+      {/* <h2 className="text-2xl font-bold mb-6 text-navy dark:text-white">In-App Notification Configuration</h2> */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <div className="space-y-2">
-            <Label>Layout</Label>
+          <div className="">
+            <Label className="text-navy dark:text-white">Layout</Label>
             <RadioGroup
               value={localConfig.modalType}
-              onValueChange={(value) => updateConfig('modalType', value as 'modal' | 'image' | 'toast')}
+              onValueChange={(value) => updateConfig('modalType', value as 'Modal' | 'Image' | 'Toast')}
+              className="flex space-x-4"
             >
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="modal" id="modal" />
-                <Label htmlFor="modal">Modal</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="image" id="image" />
-                <Label htmlFor="image">Image</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="toast" id="toast" />
-                <Label htmlFor="toast">Toast</Label>
-              </div>
+              {['Modal', 'Image', 'Toast'].map((type) => (
+                <div key={type} className="flex items-center">
+                  <RadioGroupItem value={type} id={type.toLowerCase()} className="border-green text-green" />
+                  <Label htmlFor={type.toLowerCase()} className="ml-2 text-navy dark:text-white">
+                    {type}
+                  </Label>
+                </div>
+              ))}
             </RadioGroup>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+
+          <div className="">
+            <Label htmlFor="title" className="text-navy dark:text-white">Title (max 50 characters)</Label>
             <Input
               id="title"
               value={localConfig.title}
-              onChange={(e) => updateConfig('title', e.target.value)}
+              onChange={(e) => updateConfig('title', e.target.value.slice(0, 50))}
+              maxLength={50}
+              className="border-green focus:ring-green"
             />
+            <p className="text-sm text-gray-500">{localConfig.title.length}/50 characters</p>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="body">Body</Label>
-            <Textarea
-              id="body"
-              value={localConfig.body}
-              onChange={(e) => updateConfig('body', e.target.value)}
-            />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="imageUrl">Image URL</Label>
-            <Input
-              id="imageUrl"
-              value={localConfig.imageUrl}
-              onChange={(e) => updateConfig('imageUrl', e.target.value)}
-            />
-          </div>
+          {localConfig.modalType === 'Modal' && (
 
-          <div className="space-y-2">
-            <Label htmlFor="title">Button Text</Label>
-            <Input
-              id="title"
-              value={localConfig.buttonText}
-              onChange={(e) => updateConfig('buttonText', e.target.value)}
-            />
-          </div>
+            <div className="">
+              <Label htmlFor="body" className="text-navy dark:text-white">Body</Label>
+              <Textarea
+                id="body"
+                value={localConfig.body}
+                onChange={(e) => updateConfig('body', e.target.value)}
+                className="border-green focus:ring-green"
+              />
+            </div>
+          )}
 
-          <div className="space-y-2">
-            <Label>Scheduled Date and Time</Label>
+          {(localConfig.modalType === 'Image' || localConfig.modalType === 'Modal') && (
+            <div className="">
+              <Label htmlFor="imageUrl" className="text-navy dark:text-white">Image URL</Label>
+              <Input
+                id="imageUrl"
+                value={localConfig.imageUrl}
+                onChange={(e) => updateConfig('imageUrl', e.target.value)}
+                className="border-green focus:ring-green"
+              />
+            </div>
+          )}
+
+          {(localConfig.modalType === 'Modal') && (
+            <div className="">
+              <Label htmlFor="buttonText" className="text-navy dark:text-white">Button Text</Label>
+              <Input
+                id="buttonText"
+                value={localConfig.buttonText}
+                onChange={(e) => updateConfig('buttonText', e.target.value)}
+                className="border-green focus:ring-green"
+              />
+            </div>
+          )}
+
+          <div className="">
+            <Label className="text-navy dark:text-white">Scheduled Date and Time</Label>
             <div className="flex space-x-2">
               <div className="relative flex-grow">
                 <DatePicker
@@ -182,33 +222,33 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
                     }
                   }}
                   dateFormat="MMMM d, yyyy"
-                  className="w-full p-2 pl-10 border rounded"
+                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
                   customInput={<Input />}
                 />
-                <CalendarIcon className="absolute left-3 size-4 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                <CalendarIcon className="absolute left-3 size-4 top-1/2 transform -translate-y-1/2 text-green" />
               </div>
               <div className="relative flex-grow">
                 <Input
                   type="time"
                   value={localConfig.scheduledTime}
                   onChange={(e) => updateConfig('scheduledTime', e.target.value)}
-                  className="w-full p-2 pl-10 border rounded"
+                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
                 />
-                <Clock3Icon className="absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+                <Clock3Icon className="absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-green" />
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="timezone">Timezone</Label>
+          <div className="">
+            <Label htmlFor="timezone" className="text-navy dark:text-white">Timezone</Label>
             <Select
               value={localConfig.timezone}
               onValueChange={(value) => updateConfig('timezone', value)}
             >
-              <SelectTrigger className="w-full">
+              <SelectTrigger className="w-full border-green focus:ring-green">
                 <SelectValue placeholder="Select timezone" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className='bg-white'>
                 {moment.tz.names().map((tz) => (
                   <SelectItem key={tz} value={tz}>
                     {tz}
@@ -218,37 +258,49 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label>Expiration Date</Label>
-            <div className="relative">
-              <DatePicker
-                selected={localConfig.expirationDate ? new Date(localConfig.expirationDate) : null}
-                onChange={(date: Date | null) => {
-                  if (date) {
-                    updateConfig('expirationDate', date.toISOString());
-                  } else {
-                    updateConfig('expirationDate', undefined);
-                  }
-                }}
-                dateFormat="MMMM d, yyyy"
-                className="w-full p-2 pl-10 border rounded"
-                customInput={<Input />}
-              />
-              <CalendarIcon className="absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          <div className="">
+            <Label className="text-navy dark:text-white">Scheduled Date and Time</Label>
+            <div className="flex space-x-2">
+              <div className="relative flex-grow">
+                <DatePicker
+                  selected={localConfig.scheduledDate ? new Date(localConfig.scheduledDate) : null}
+                  onChange={(date: Date | null) => {
+                    if (date) {
+                      updateConfig('scheduledDate', date.toISOString());
+                    } else {
+                      updateConfig('scheduledDate', undefined);
+                    }
+                  }}
+                  dateFormat="MMMM d, yyyy"
+                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
+                  customInput={<Input />}
+                />
+                <CalendarIcon className="absolute left-3 size-4 top-1/2 transform -translate-y-1/2 text-green" />
+              </div>
+              <div className="relative flex-grow">
+                <Input
+                  type="time"
+                  value={localConfig.scheduledTime}
+                  onChange={(e) => updateConfig('scheduledTime', e.target.value)}
+                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
+                />
+                <Clock3Icon className="absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-green" />
+              </div>
             </div>
+            <p className="text-sm text-red-500">{timeUntilSend}</p>
           </div>
         </div>
         <DevicePreview config={localConfig} />
       </div>
       <div className="mt-6 space-x-4">
-        <Button onClick={handleSave}>
+        <Button onClick={handleSave} className="bg-green hover:bg-green-dark text-white">
           Save
         </Button>
-        <Button onClick={sendNotification}>
+        <Button onClick={sendNotification} className="bg-navy hover:bg-navy-light text-white">
           Send Notification
         </Button>
       </div>
-      {notificationStatus && <p className="mt-4 text-sm">{notificationStatus}</p>}
+      {notificationStatus && <p className="mt-4 text-sm text-green">{notificationStatus}</p>}
     </div>
   );
 }

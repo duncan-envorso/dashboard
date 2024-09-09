@@ -3,15 +3,15 @@ import { Toaster } from '@/components/ui/toaster';
 import '@uploadthing/react/styles.css';
 import type { Metadata } from 'next';
 import NextTopLoader from 'nextjs-toploader';
-import { Inter } from 'next/font/google';
+import { Inter } from 'next/font/google'; // Using Inter font as Industry is not available
 import './globals.css';
 import { auth } from '@/auth';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'Seattle Seawolves Dashboard',
+  description: 'Official dashboard for Seattle Seawolves Rugby'
 };
 
 export default async function RootLayout({
@@ -21,15 +21,26 @@ export default async function RootLayout({
 }) {
   const session = await auth();
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${inter.className} overflow-hidden `}
+        className={`${inter.className} overflow-hidden bg-light-grey dark:bg-navy text-navy dark:text-white h-full`}
         suppressHydrationWarning={true}
       >
-        <NextTopLoader showSpinner={false} />
+        <NextTopLoader 
+          color="#64B246" 
+          showSpinner={false} 
+          shadow="0 0 10px #64B246,0 0 5px #64B246"
+        />
         <Providers session={session}>
           <Toaster />
-          {children}
+          <div className="flex flex-col h-full">
+            <main className="flex-grow">
+              {children}
+            </main>
+            <footer className="py-4 text-center text-sm text-navy dark:text-white bg-white dark:bg-navy-dark">
+              © {new Date().getFullYear()} Seattle Seawolves. All rights reserved.
+            </footer>
+          </div>
         </Providers>
       </body>
     </html>

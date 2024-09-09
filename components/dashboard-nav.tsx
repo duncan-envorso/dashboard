@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { NavItem } from '@/types';
@@ -33,13 +32,12 @@ export function DashboardNav({
     return null;
   }
 
-  console.log('isActive', isMobileNav, isMinimized);
-
   return (
     <nav className="grid items-start gap-2">
       <TooltipProvider>
         {items.map((item, index) => {
           const Icon = Icons[item.icon || 'arrowRight'];
+          const isActive = path === item.href;
           return (
             item.href && (
               <Tooltip key={index}>
@@ -47,16 +45,20 @@ export function DashboardNav({
                   <Link
                     href={item.disabled ? '/' : item.href}
                     className={cn(
-                      'flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
-                      path === item.href ? 'bg-accent' : 'transparent',
+                      'flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium transition-colors duration-200',
+                      isActive
+                        ? 'bg-green text-white'
+                        : 'text-white hover:bg-green hover:text-white',
                       item.disabled && 'cursor-not-allowed opacity-80'
                     )}
                     onClick={() => {
                       if (setOpen) setOpen(false);
                     }}
                   >
-                    <Icon className={`ml-3 size-5 flex-none`} />
-
+                    <Icon className={cn(
+                      'ml-3 size-5 flex-none',
+                      isActive ? 'text-white' : 'text-white'
+                    )} />
                     {isMobileNav || (!isMinimized && !isMobileNav) ? (
                       <span className="mr-2 truncate">{item.title}</span>
                     ) : (
@@ -68,7 +70,10 @@ export function DashboardNav({
                   align="center"
                   side="right"
                   sideOffset={8}
-                  className={!isMinimized ? 'hidden' : 'inline-block'}
+                  className={cn(
+                    !isMinimized ? 'hidden' : 'inline-block',
+                    'bg-white text-navy border border-green'
+                  )}
                 >
                   {item.title}
                 </TooltipContent>

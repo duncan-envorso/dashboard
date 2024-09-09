@@ -4,14 +4,14 @@ import { LayoutTemplate, Image, MessageSquare } from "lucide-react"
 
 interface LayoutProps {
   layout: string
-  setLayout: (layout: 'modal' | 'image' | 'toast') => void
+  setLayout: (layout: 'Modal' | 'Image' | 'Toast') => void
 }
 
 export default function Component({ layout, setLayout }: LayoutProps) {
   const layouts = [
-    { type: 'modal', icon: MessageSquare, label: 'Modal' },
-    { type: 'image', icon: Image, label: 'Image' },
-    { type: 'toast', icon: LayoutTemplate, label: 'Toast' },
+    { type: 'Modal', icon: MessageSquare, label: 'Modal' },
+    { type: 'Image', icon: Image, label: 'Image' },
+    { type: 'Toast', icon: LayoutTemplate, label: 'Toast' },
   ]
 
   return (

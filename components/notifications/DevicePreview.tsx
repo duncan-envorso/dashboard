@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { X } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 import Image from 'next/image';
 import { MessageConfig } from '@/types';
 
@@ -44,27 +44,33 @@ export default function Component({ config }: DevicePreviewProps = { config: {} 
   );
 
   const ToastPreview = () => (
-    <div className="bg-white rounded-lg shadow-lg p-4 absolute top-4 right-4 left-4 flex items-center">
-      <div className="flex-grow pr-4">
-        <h3 className="text-lg font-bold mb-1" style={{ color: config.textColor }}>{config.title || 'Title'}</h3>
-        <p className="text-sm" style={{ color: config.textColor }}>{config.body || 'Body text'}</p>
+    <div className="bg-white rounded-lg shadow-md p-4 absolute top-4 right-3 left-3 flex items-start border-l-4 border-green-500">
+      <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-1.5 flex-shrink-0" />
+      <div className="flex-grow pr-4 mt-1.5 overflow-hidden">
+        {config.title ? (
+          <h3 className="text-xs text-primary text-gray-900 break-words">{config.title}</h3>
+        ) : (
+          <p className="text-xs text-gray-600 break-words">{config.body || 'Notification message'}</p>
+        )}
       </div>
       <Button 
-        className="shrink-0 py-2 px-4 rounded-full transition-colors"
-        style={{ backgroundColor: config.buttonBackground, color: config.buttonTextColor }}
+        variant="ghost"
+        size="icon"
+        className="shrink-0 -mt-1 -mr-2 text-gray-400 hover:text-gray-600"
+        aria-label="Close"
       >
-        {config.buttonText || 'Action'}
+        <X className="h-4 w-4" />
       </Button>
     </div>
   );
 
   const PreviewContent = () => {
     switch (config.modalType) {
-      case 'modal':
+      case 'Modal':
         return <ModalPreview />;
-      case 'image':
+      case 'Image':
         return <ImagePreview />;
-      case 'toast':
+      case 'Toast':
         return <ToastPreview />;
       default:
         return <div className="text-center p-4 text-gray-500">Please select a layout type</div>;

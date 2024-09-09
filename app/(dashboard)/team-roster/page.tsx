@@ -9,7 +9,7 @@ import ButtonCustomizer from '../../../components/notifications/ButtonCustomizer
 import DevicePreview from '../../../components/notifications/DevicePreview';
 
 export interface MessageConfig {
-  layout: 'modal' | 'image' | 'toast';
+  layout: 'Modal' | 'Image' | 'Toast';
   textColor: string;
   title: string;
   body: string;
@@ -22,7 +22,7 @@ export interface MessageConfig {
 
 const MessageCustomizer: React.FC = () => {
   const [config, setConfig] = useState<MessageConfig>({
-    layout: 'modal',
+    layout: 'Modal',
    
     textColor: '#000000',
     title: 'Back of the Year 2024',
