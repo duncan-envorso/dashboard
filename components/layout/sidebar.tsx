@@ -30,42 +30,39 @@ export default function Sidebar({ className }: SidebarProps) {
   return (
     <aside
       className={cn(
-        `relative hidden h-screen flex-none border-r transition-[width] duration-500 md:block`,
-        !isMinimized ? 'w-72' : 'w-[72px]',
-        'bg-white dark:bg-navy text-navy dark:text-white',
+        `relative hidden h-screen flex-col border-r transition-all duration-300 ease-in-out md:flex`,
+        isMinimized ? 'w-[72px]' : 'w-72',
+        'bg-navy text-white ',
         className
       )}
     >
       <div className="flex items-center justify-center p-5 pt-10">
         <Link href="/">
-          {isMinimized ? (
-            <Image
-              src="/images/logo.webp"
-              alt="Seattle Seawolves"
-              width={90}
-              height={90}
-            />
-          ) : (
-            <Image
-              src="/images/logo.webp"
-              alt="Seattle Seawolves"
-              width={90}
-              height={90}
-            />
-          )}
+          <Image
+            src="/images/logo.webp"
+            alt="Seattle Seawolves"
+            width={isMinimized ? 40 : 90}
+            height={isMinimized ? 40 : 90}
+          />
         </Link>
       </div>
-      <ChevronLeft
+      <Button
+        variant="ghost"
+        size="icon"
         className={cn(
-          'absolute -right-3 top-20 z-50 cursor-pointer rounded-full border bg-green text-white hover:bg-green-dark transition-colors',
+          'absolute -right-3 top-20 z-50 rounded-full border bg-green text-white hover:bg-green-dark transition-colors',
           isMinimized && 'rotate-180'
         )}
         onClick={handleToggle}
-      />
-      <div className="space-y-4 py-4">
-        <div className="px-3 py-2">
-          <div className="mt-3 space-y-1">
-            <DashboardNav items={navItems} />
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      <div className="flex-grow overflow-y-auto">
+        <div className="space-y-4 py-4">
+          <div className="px-3 py-2">
+            <div className="mt-3 space-y-1">
+              <DashboardNav items={navItems} />
+            </div>
           </div>
         </div>
       </div>

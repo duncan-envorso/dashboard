@@ -15,7 +15,7 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="flex h-screen bg-light-grey dark:bg-navy font-industry">
-      <Sidebar className="bg-navy text-white w-80 flex-shrink-0" />
+      <Sidebar />
       <main className="flex-1 flex flex-col overflow-hidden">
         <Header  />
         <ScrollArea className="flex-1 p-6">

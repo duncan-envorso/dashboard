@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { CalendarIcon, Clock3Icon } from 'lucide-react';
+import { CalendarIcon, Clock3Icon, InfoIcon } from 'lucide-react';
 import DevicePreview from './DevicePreview';
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -13,14 +13,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageConfig } from '@/types';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface NotificationsComponentProps {
   config?: Partial<MessageConfig>;
   onSave: (config: MessageConfig) => void;
   teamId: string;
-  onNotificationSent: (status: "scheduled" | "draft" | "failed" | "active" | "completed" | "canceled") => void;
+  onNotificationSent: (status: "Scheduled" | "Draft" | "Failed" | "Active" | "Completed" | "Canceled" | "Deleted") => void;
 }
-
 const defaultConfig: MessageConfig = {
   modalType: 'Modal',
   teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
@@ -31,10 +31,15 @@ const defaultConfig: MessageConfig = {
   buttonText: '',
   buttonBackground: '#000000',
   buttonTextColor: '#ffffff',
-  expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   scheduledDate: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
   scheduledTime: new Date(Date.now() + 60 * 60 * 1000).toTimeString().slice(0, 5), // HH:MM format
+  expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+  status: 'Draft', // Add status field with default value 'Draft'
+  id: '', // Add default value for id
+  createdAt: new Date().toISOString(), // Add default value for createdAt
+  createdBy: '', // Add default value for createdBy
+  updatedAt: new Date().toISOString(), // Add default value for updatedAt
 };
 
 export default function NotificationConfig({ config, onSave, teamId, onNotificationSent }: NotificationsComponentProps) {
@@ -44,6 +49,12 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
   });
   const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
   const [timeUntilSend, setTimeUntilSend] = useState<string>('');
+
+  const calculateExpirationDate = (days: number) => {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return date.toISOString();
+  };
 
   useEffect(() => {
     const updateTimeUntilSend = () => {
@@ -66,21 +77,28 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
     return () => clearInterval(interval);
   }, [localConfig.scheduledDate, localConfig.scheduledTime]);
 
-
-
   const updateConfig = (key: keyof MessageConfig, value: string | Date | undefined) => {
     setLocalConfig(prev => ({
       ...prev,
-      [key]: key === 'scheduledDate' && value instanceof Date ? value.toISOString() : value
+      [key]: key === 'scheduledDate' || key === 'expirationDate'
+        ? (value instanceof Date ? value.toISOString() : value)
+        : value
     }));
   };
 
   const handleSave = () => {
-    onSave(localConfig);
+    const updatedConfig: MessageConfig = {
+      ...localConfig,
+      status: 'Draft' as const,
+      scheduledDate: undefined,
+      scheduledTime: undefined,
+    };
+    onSave(updatedConfig);
+    onNotificationSent('Draft');
+    setNotificationStatus('Notification saved as draft');
   };
 
   const sendNotification = async () => {
-    console.log(localConfig)
     try {
       const apiKey = process.env.NEXT_PUBLIC_NOTIFICATION_KEY;
       if (!apiKey) {
@@ -90,16 +108,15 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
         `${localConfig.scheduledDate?.split('T')[0]}T${localConfig.scheduledTime}`,
         localConfig.timezone || 'UTC'
       ).toISOString();
-
+      
       const response = await fetch(`https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=${teamId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${apiKey}`,
         },
-
         body: JSON.stringify({
-          teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
+          teamId: localConfig.teamId,
           modalType: localConfig.modalType,
           expirationDate: localConfig.expirationDate,
           title: localConfig.title,
@@ -112,34 +129,35 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           button_background_color: localConfig.buttonBackground,
           scheduledDateTime: scheduledDateTime,
           timezone: localConfig.timezone,
+          status: 'Scheduled', // Always set status to 'Scheduled'
         }),
       });
-
+  
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to send in-app modal: ${response.status} ${response.statusText}. ${errorText}`);
       }
-
-
-
+  
       const result = await response.json();
-      console.log("In-app modal sent successfully:", result);
-      setNotificationStatus('In-app modal sent successfully!');
-      onNotificationSent('active');
+      console.log("In-app modal scheduled successfully:", result);
+      setNotificationStatus('In-app modal scheduled successfully!');
+      onNotificationSent('Scheduled');
     } catch (error) {
-      console.error('Error sending in-app modal:', error);
+      console.error('Error scheduling in-app modal:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
-      setNotificationStatus(`Failed to send in-app modal: ${errorMessage}`);
-      onNotificationSent('failed');
+      setNotificationStatus(`Failed to schedule in-app modal: ${errorMessage}`);
+      onNotificationSent('Failed');
     }
   };
 
+
+
+
   return (
     <div className="bg-white dark:bg-navy text-navy dark:text-white w-full p-4 rounded-lg border border-green shadow-sm">
-      {/* <h2 className="text-2xl font-bold mb-6 text-navy dark:text-white">In-App Notification Configuration</h2> */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
-          <div className="">
+          <div>
             <Label className="text-navy dark:text-white">Layout</Label>
             <RadioGroup
               value={localConfig.modalType}
@@ -157,8 +175,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
             </RadioGroup>
           </div>
 
-
-          <div className="">
+          <div>
             <Label htmlFor="title" className="text-navy dark:text-white">Title (max 50 characters)</Label>
             <Input
               id="title"
@@ -170,10 +187,8 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
             <p className="text-sm text-gray-500">{localConfig.title.length}/50 characters</p>
           </div>
 
-
           {localConfig.modalType === 'Modal' && (
-
-            <div className="">
+            <div>
               <Label htmlFor="body" className="text-navy dark:text-white">Body</Label>
               <Textarea
                 id="body"
@@ -185,7 +200,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           )}
 
           {(localConfig.modalType === 'Image' || localConfig.modalType === 'Modal') && (
-            <div className="">
+            <div>
               <Label htmlFor="imageUrl" className="text-navy dark:text-white">Image URL</Label>
               <Input
                 id="imageUrl"
@@ -197,7 +212,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           )}
 
           {(localConfig.modalType === 'Modal') && (
-            <div className="">
+            <div>
               <Label htmlFor="buttonText" className="text-navy dark:text-white">Button Text</Label>
               <Input
                 id="buttonText"
@@ -208,38 +223,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
             </div>
           )}
 
-          <div className="">
-            <Label className="text-navy dark:text-white">Scheduled Date and Time</Label>
-            <div className="flex space-x-2">
-              <div className="relative flex-grow">
-                <DatePicker
-                  selected={localConfig.scheduledDate ? new Date(localConfig.scheduledDate) : null}
-                  onChange={(date: Date | null) => {
-                    if (date) {
-                      updateConfig('scheduledDate', date.toISOString());
-                    } else {
-                      updateConfig('scheduledDate', undefined);
-                    }
-                  }}
-                  dateFormat="MMMM d, yyyy"
-                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
-                  customInput={<Input />}
-                />
-                <CalendarIcon className="absolute left-3 size-4 top-1/2 transform -translate-y-1/2 text-green" />
-              </div>
-              <div className="relative flex-grow">
-                <Input
-                  type="time"
-                  value={localConfig.scheduledTime}
-                  onChange={(e) => updateConfig('scheduledTime', e.target.value)}
-                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
-                />
-                <Clock3Icon className="absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-green" />
-              </div>
-            </div>
-          </div>
-
-          <div className="">
+          <div>
             <Label htmlFor="timezone" className="text-navy dark:text-white">Timezone</Label>
             <Select
               value={localConfig.timezone}
@@ -258,7 +242,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
             </Select>
           </div>
 
-          <div className="">
+          <div>
             <Label className="text-navy dark:text-white">Scheduled Date and Time</Label>
             <div className="flex space-x-2">
               <div className="relative flex-grow">
@@ -266,7 +250,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
                   selected={localConfig.scheduledDate ? new Date(localConfig.scheduledDate) : null}
                   onChange={(date: Date | null) => {
                     if (date) {
-                      updateConfig('scheduledDate', date.toISOString());
+                      updateConfig('scheduledDate', date);
                     } else {
                       updateConfig('scheduledDate', undefined);
                     }
@@ -287,7 +271,51 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
                 <Clock3Icon className="absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-green" />
               </div>
             </div>
-            <p className="text-sm text-red-500">{timeUntilSend}</p>
+            <p className="text-sm text-green mt-1">{timeUntilSend}</p>
+          </div>
+
+
+
+          <div>
+          <Label className="text-navy dark:text-white flex items-center">
+              Expiration Date
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <InfoIcon className="ml-2 h-4 w-4 text-green cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="z-50 bg-white p-2 rounded shadow">
+                    <p>The date when this notification will no longer be shown to users.</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Label>
+            <Select
+              value={localConfig.expirationDate ? new Date(localConfig.expirationDate).getDate() - new Date().getDate() + '' : ''}
+              onValueChange={(value) => updateConfig('expirationDate', calculateExpirationDate(parseInt(value)))}
+            >
+              <SelectTrigger className="w-full border-green focus:ring-green">
+                <SelectValue placeholder="Select expiration" />
+              </SelectTrigger>
+              <SelectContent className='bg-white'>
+                {[1, 2, 3, 4, 5, 6, 7].map((days) => (
+                  <SelectItem key={days} value={days.toString()}>
+                    {days} {days === 1 ? 'day' : 'days'}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-sm text-green mt-1">
+              Expiration: {localConfig.expirationDate
+                ? new Date(localConfig.expirationDate).toLocaleString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+                : 'Not set'}
+            </p>
           </div>
         </div>
         <DevicePreview config={localConfig} />

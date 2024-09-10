@@ -20,11 +20,7 @@ interface DashboardNavProps {
   isMobileNav?: boolean;
 }
 
-export function DashboardNav({
-  items,
-  setOpen,
-  isMobileNav = false
-}: DashboardNavProps) {
+export function DashboardNav({ items, setOpen }: DashboardNavProps) {
   const path = usePathname();
   const { isMinimized } = useSidebar();
 
@@ -45,7 +41,7 @@ export function DashboardNav({
                   <Link
                     href={item.disabled ? '/' : item.href}
                     className={cn(
-                      'flex items-center gap-2 overflow-hidden rounded-md py-2 text-sm font-medium transition-colors duration-200',
+                      'flex items-center gap-2 rounded-md py-2 text-sm font-medium transition-colors duration-200',
                       isActive
                         ? 'bg-green text-white'
                         : 'text-white hover:bg-green hover:text-white',
@@ -56,13 +52,11 @@ export function DashboardNav({
                     }}
                   >
                     <Icon className={cn(
-                      'ml-3 size-5 flex-none',
+                      'ml-3 h-5 w-5 flex-shrink-0',
                       isActive ? 'text-white' : 'text-white'
                     )} />
-                    {isMobileNav || (!isMinimized && !isMobileNav) ? (
-                      <span className="mr-2 truncate">{item.title}</span>
-                    ) : (
-                      ''
+                    {!isMinimized && (
+                      <span className="truncate">{item.title}</span>
                     )}
                   </Link>
                 </TooltipTrigger>
