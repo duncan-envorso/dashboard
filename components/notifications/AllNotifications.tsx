@@ -10,21 +10,10 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useNotifications } from '@/app/contexts/NotifcationsContext'
+import { Notification, useNotifications } from '@/app/contexts/NotifcationsContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChevronUp, ChevronDown } from 'lucide-react'
 
-interface Notification {
-  id: string
-  title: string
-  modal_type: string
-  created_at: string
-  created_by: string
-  sending_at?: string
-  expiration_date?: string
-  delivered?: number
-  clicked?: number
-}
 
 const columns: ColumnDef<Notification>[] = [
   {
@@ -80,6 +69,13 @@ const columns: ColumnDef<Notification>[] = [
       typeof row.original.clicked === 'number' ? row.original.clicked : 'N/A'
     ),
   },
+  {
+    accessorKey: 'opened', // New column for opened status
+    header: 'Opened',
+    cell: ({ row }) => (
+      typeof row.original.opened === 'boolean' ? (row.original.opened ? 'Yes' : 'No') : 'N/A'
+    ),
+  },
 ]
 
 export default function NotificationsCard() {
@@ -101,10 +97,10 @@ export default function NotificationsCard() {
   if (error) return <div>Error: {error}</div>
 
   return (
-    <Card className="m-5 border-l-4 border-l-green shadow-md dark:bg-navy-light overflow-hidden">
-      <CardHeader className="bg-navy dark:bg-navy-dark text-white">
+    <Card className="m-5 border-l-4 border-l-green shadow-md -light overflow-hidden">
+      <CardHeader className="bg-navy  text-white">
         <CardTitle className="text-2xl font-industry font-bold">Notifications</CardTitle>
-        <CardDescription className="text-light-grey dark:text-gray-300">View all in-app notifications</CardDescription>
+        <CardDescription className="text-light-grey ">View all in-app notifications</CardDescription>
       </CardHeader>
       <CardContent className="mt-4 overflow-x-auto">
         <Table>
@@ -115,7 +111,7 @@ export default function NotificationsCard() {
                   return (
                     <TableHead
                       key={header.id}
-                      className="text-navy rounded dark:text-white cursor-pointer"
+                      className="text-navy rounded  cursor-pointer"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -139,7 +135,7 @@ export default function NotificationsCard() {
                   className="hover:bg-green/10 rounded dark:hover:bg-green/20"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="dark:text-white">
+                    <TableCell key={cell.id} className="">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

@@ -14,6 +14,9 @@ import SentNotificationsTable from './CompletedNotifications';
 import DraftNotifications from './DraftNotifications';
 import ScheduledNotifications from './ScheduledNotifications';
 import ActiveNotifications from './ActiveNotifications';
+import Image from 'next/image';
+import { Bell, LayoutTemplate } from 'lucide-react';
+import NotificationTypeDialog from './NotifcationTypeDialog';
 
 
 
@@ -172,10 +175,10 @@ const NotificationsTable: React.FC = () => {
   };
 
   return (
-    <div className="bg-light-grey dark:bg-navy min-h-screen">
+    <div className="bg-light-grey  min-h-screen">
       <NotifcationsHeader handleAdd={handleAdd} />
       <Tabs defaultValue="all">
-        <TabsList className="bg-white dark:bg-navy-light">
+        <TabsList className="bg-white -light">
           <TabsTrigger
             value="all"
             className="data-[state=active]:bg-green data-[state=active]:text-white"
@@ -228,27 +231,16 @@ const NotificationsTable: React.FC = () => {
         </TabsContent>
       </Tabs>
 
-
-      <Dialog open={isAddScreenOpen} onOpenChange={setIsAddScreenOpen}>
-        <DialogContent className="sm:max-w-[425px] bg-white dark:bg-navy-light border-2 border-green">
-          <DialogHeader>
-            <DialogTitle className="text-navy dark:text-white font-industry font-bold">Choose Notification Type</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <Button onClick={() => handleAddOption('push')} className="bg-navy text-white hover:bg-navy/90 dark:bg-white dark:text-navy dark:hover:bg-gray-200">
-              Push Notification
-            </Button>
-            <Button onClick={() => handleAddOption('Modal')} className="bg-green text-white hover:bg-green-dark">
-              Modal
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <NotificationTypeDialog
+  isAddScreenOpen={isAddScreenOpen}
+  setIsAddScreenOpen={setIsAddScreenOpen}
+  handleAddOption={handleAddOption}
+/>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:min-w-[800px] shadow-xl border-2  border-green bg-white dark:bg-navy-light">
+        <DialogContent className="sm:min-w-[800px] shadow-xl border-2  border-green bg-white -light">
           <DialogHeader>
-            <DialogTitle className="text-navy dark:text-white font-industry font-bold">
+            <DialogTitle className="text-navy  font-industry font-bold">
               {selectedNotication ? 'Edit In-App Notification' : 'Add In-App Notification'}
             </DialogTitle>
           </DialogHeader>

@@ -25,11 +25,11 @@ const defaultConfig: MessageConfig = {
   modalType: 'Modal',
   teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
   textColor: '#000000',
-  title: '',
-  body: '',
-  imageUrl: '',
-  buttonText: '',
-  buttonBackground: '#000000',
+  title: 'Major League Rugby Back of the Year 2024',
+  body: 'The New England Free Jacks’ 2024 season will be remembered for its exhilarating highs, and much of that success can be attributed to the electrifying performances of Reece MacDonald. ',
+  imageUrl: 'https://freejacks.com/wp-content/uploads/2024/08/Reece-1.jpg',
+  buttonText: 'Read More',
+  buttonBackground: '#24613a',
   buttonTextColor: '#ffffff',
   scheduledDate: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
   scheduledTime: new Date(Date.now() + 60 * 60 * 1000).toTimeString().slice(0, 5), // HH:MM format
@@ -108,7 +108,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
         `${localConfig.scheduledDate?.split('T')[0]}T${localConfig.scheduledTime}`,
         localConfig.timezone || 'UTC'
       ).toISOString();
-      
+
       const response = await fetch(`https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=${teamId}`, {
         method: 'POST',
         headers: {
@@ -132,12 +132,12 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           status: 'Scheduled', // Always set status to 'Scheduled'
         }),
       });
-  
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Failed to send in-app modal: ${response.status} ${response.statusText}. ${errorText}`);
       }
-  
+
       const result = await response.json();
       console.log("In-app modal scheduled successfully:", result);
       setNotificationStatus('In-app modal scheduled successfully!');
@@ -154,11 +154,11 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
 
 
   return (
-    <div className="bg-white dark:bg-navy text-navy dark:text-white w-full p-4 rounded-lg border border-green shadow-sm">
+    <div className="bg-white  text-navy  w-full p-4 rounded-lg border border-green shadow-sm">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div>
-            <Label className="text-navy dark:text-white">Layout</Label>
+            <Label className="text-navy ">Layout</Label>
             <RadioGroup
               value={localConfig.modalType}
               onValueChange={(value) => updateConfig('modalType', value as 'Modal' | 'Image' | 'Toast')}
@@ -167,7 +167,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
               {['Modal', 'Image', 'Toast'].map((type) => (
                 <div key={type} className="flex items-center">
                   <RadioGroupItem value={type} id={type.toLowerCase()} className="border-green text-green" />
-                  <Label htmlFor={type.toLowerCase()} className="ml-2 text-navy dark:text-white">
+                  <Label htmlFor={type.toLowerCase()} className="ml-2 text-navy ">
                     {type}
                   </Label>
                 </div>
@@ -176,7 +176,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           </div>
 
           <div>
-            <Label htmlFor="title" className="text-navy dark:text-white">Title (max 50 characters)</Label>
+            <Label htmlFor="title" className="text-navy ">Title (max 50 characters)</Label>
             <Input
               id="title"
               value={localConfig.title}
@@ -189,19 +189,20 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
 
           {localConfig.modalType === 'Modal' && (
             <div>
-              <Label htmlFor="body" className="text-navy dark:text-white">Body</Label>
+              <Label htmlFor="body" className="text-navy ">Body (max 200 characters)</Label>
               <Textarea
                 id="body"
                 value={localConfig.body}
-                onChange={(e) => updateConfig('body', e.target.value)}
+                onChange={(e) => updateConfig('body', e.target.value.slice(0, 200))}
                 className="border-green focus:ring-green"
               />
+              <p className="text-sm text-gray-500">{localConfig.body.length}/200 characters</p>
             </div>
           )}
 
           {(localConfig.modalType === 'Image' || localConfig.modalType === 'Modal') && (
             <div>
-              <Label htmlFor="imageUrl" className="text-navy dark:text-white">Image URL</Label>
+              <Label htmlFor="imageUrl" className="text-navy ">Image URL</Label>
               <Input
                 id="imageUrl"
                 value={localConfig.imageUrl}
@@ -213,7 +214,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
 
           {(localConfig.modalType === 'Modal') && (
             <div>
-              <Label htmlFor="buttonText" className="text-navy dark:text-white">Button Text</Label>
+              <Label htmlFor="buttonText" className="text-navy ">Button Text</Label>
               <Input
                 id="buttonText"
                 value={localConfig.buttonText}
@@ -224,7 +225,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           )}
 
           <div>
-            <Label htmlFor="timezone" className="text-navy dark:text-white">Timezone</Label>
+            <Label htmlFor="timezone" className="text-navy ">Timezone</Label>
             <Select
               value={localConfig.timezone}
               onValueChange={(value) => updateConfig('timezone', value)}
@@ -243,7 +244,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           </div>
 
           <div>
-            <Label className="text-navy dark:text-white">Scheduled Date and Time</Label>
+            <Label className="text-navy ">Scheduled Date and Time</Label>
             <div className="flex space-x-2">
               <div className="relative flex-grow">
                 <DatePicker
@@ -256,7 +257,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
                     }
                   }}
                   dateFormat="MMMM d, yyyy"
-                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
+                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy  "
                   customInput={<Input />}
                 />
                 <CalendarIcon className="absolute left-3 size-4 top-1/2 transform -translate-y-1/2 text-green" />
@@ -266,7 +267,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
                   type="time"
                   value={localConfig.scheduledTime}
                   onChange={(e) => updateConfig('scheduledTime', e.target.value)}
-                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy dark:text-white dark:bg-navy"
+                  className="w-full p-2 pl-10 border border-green rounded focus:ring-green text-navy  "
                 />
                 <Clock3Icon className="absolute size-4 left-3 top-1/2 transform -translate-y-1/2 text-green" />
               </div>
@@ -277,7 +278,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
 
 
           <div>
-          <Label className="text-navy dark:text-white flex items-center">
+            <Label className="text-navy  flex items-center">
               Expiration Date
               <TooltipProvider>
                 <Tooltip>

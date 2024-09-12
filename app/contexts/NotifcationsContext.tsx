@@ -23,6 +23,7 @@ export type Notification = {
   delivered?: number;
   clicked?: number;
   status: ModalSchedulingStatus;
+  opened?: number;
 };
 
 interface NotificationsContextType {

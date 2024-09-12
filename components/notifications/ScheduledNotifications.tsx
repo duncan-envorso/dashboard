@@ -51,7 +51,7 @@ const columns: ColumnDef<Notification>[] = [
   },
   {
     accessorKey: 'sending_at',
-    header: 'Sending at',
+    header: 'Sent at',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
         {row.original.sending_at ? new Date(row.original.sending_at).toLocaleString() : 'N/A'}
@@ -60,7 +60,7 @@ const columns: ColumnDef<Notification>[] = [
   },
   {
     accessorKey: 'expiration_date',
-    header: 'Expires at',
+    header: 'Expired at',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
         {row.original.expiration_date ? new Date(row.original.expiration_date).toLocaleString() : 'N/A'}
@@ -83,17 +83,17 @@ const columns: ColumnDef<Notification>[] = [
   },
 ]
 
-export default function ScheduledNotifications() {
+export default function ExpiredNotifications() {
   const { notifications, loading, error } = useNotifications()
   const [sorting, setSorting] = React.useState<SortingState>([])
 
-  const scheduledNotifications = React.useMemo(() => 
+  const expiredNotifications = React.useMemo(() => 
     notifications.filter(notification => notification.status === "Scheduled"),
     [notifications]
   )
 
   const table = useReactTable({
-    data: scheduledNotifications,
+    data: expiredNotifications,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -107,10 +107,10 @@ export default function ScheduledNotifications() {
   if (error) return <div>Error: {error}</div>
 
   return (
-    <Card className="m-5 border-l-4 border-l-green shadow-md dark:bg-navy-light overflow-hidden">
-      <CardHeader className="bg-navy dark:bg-navy-dark text-white">
-        <CardTitle className="text-2xl font-industry font-bold">Scheduled Notifications</CardTitle>
-        <CardDescription className="text-light-grey dark:text-gray-300">View all scheduled in-app notifications</CardDescription>
+    <Card className="m-5 border-l-4 border-l-green shadow-md -light overflow-hidden">
+      <CardHeader className="bg-navy  text-white">
+        <CardTitle className="text-2xl font-industry font-bold">Expired Notifications</CardTitle>
+        <CardDescription className="text-light-grey ">View all expired in-app notifications</CardDescription>
       </CardHeader>
       <CardContent className="mt-4 overflow-x-auto">
         <Table>
@@ -121,7 +121,7 @@ export default function ScheduledNotifications() {
                   return (
                     <TableHead
                       key={header.id}
-                      className="text-navy rounded dark:text-white cursor-pointer"
+                      className="text-navy rounded  cursor-pointer"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -145,7 +145,7 @@ export default function ScheduledNotifications() {
                   className="hover:bg-green/10 rounded dark:hover:bg-green/20"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="dark:text-white">
+                    <TableCell key={cell.id} className="">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -154,7 +154,7 @@ export default function ScheduledNotifications() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No scheduled notifications.
+                  No expired notifications.
                 </TableCell>
               </TableRow>
             )}

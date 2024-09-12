@@ -39,7 +39,7 @@ export default function Sidebar({ className }: SidebarProps) {
       <div className="flex items-center justify-center p-5 pt-10">
         <Link href="/">
           <Image
-            src="/images/logo.webp"
+            src="/images/Chicago_hounds_logo.png"
             alt="Seattle Seawolves"
             width={isMinimized ? 40 : 90}
             height={isMinimized ? 40 : 90}
@@ -69,7 +69,7 @@ export default function Sidebar({ className }: SidebarProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute bottom-5 left-5 text-navy dark:text-white hover:bg-green hover:text-white dark:hover:bg-green dark:hover:text-navy"
+        className="absolute bottom-5 left-5 text-navy  hover:bg-green hover:text-white dark:hover:bg-green dark:hover:text-navy"
         onClick={toggleTheme}
       >
         <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />

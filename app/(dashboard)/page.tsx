@@ -49,10 +49,7 @@ export default function Dashboard() {
           <h2 className="text-3xl font-bold tracking-tight text-navy">
             Dashboard
           </h2>
-          <div className="hidden items-center space-x-2 md:flex">
-            <CalendarDateRangePicker />
-            <Button className="bg-green hover:bg-green-dark text-white">Download</Button>
-          </div>
+
         </div>
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList className="bg-light-grey">

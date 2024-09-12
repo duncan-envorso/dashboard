@@ -14,12 +14,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen bg-light-grey dark:bg-navy font-industry">
+    <div className="flex h-screen bg-light-grey  font-industry">
       <Sidebar />
       <main className="flex-1 flex flex-col overflow-hidden">
         <Header  />
         <ScrollArea className="flex-1 p-6">
-          <div className="max-w-[1200px] dark:bg-navy mx-auto">
+          <div className="max-w-[1200px]  mx-auto">
             {children}
           </div>
         </ScrollArea>

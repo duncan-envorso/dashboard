@@ -21,12 +21,12 @@ export default async function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body
-        className={`overflow-hidden bg-light-grey dark:bg-navy text-navy dark:text-white h-full`}
+        className={`overflow-hidden bg-light-grey  text-navy  h-full`}
         suppressHydrationWarning={true}
       >
-        <NextTopLoader 
-          color="#64B246" 
-          showSpinner={false} 
+        <NextTopLoader
+          color="#64B246"
+          showSpinner={false}
           shadow="0 0 10px #64B246,0 0 5px #64B246"
         />
         <Providers session={session}>
@@ -35,7 +35,7 @@ export default async function RootLayout({
             <main className="flex-grow">
               {children}
             </main>
-            <footer className="py-4 text-center text-sm text-navy dark:text-white bg-white dark:bg-navy-dark">
+            <footer className="py-4 text-center text-sm text-navy bg-white ">
               © {new Date().getFullYear()} Seattle Seawolves. All rights reserved.
             </footer>
           </div>

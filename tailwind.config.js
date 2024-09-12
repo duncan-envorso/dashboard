@@ -51,9 +51,9 @@ module.exports = {
           DEFAULT: 'var(--card)',
           foreground: 'var(--card-foreground)'
         },
-        navy: '#00265C',
+        navy: '#006241',
         green: {
-          DEFAULT: '#64B246',
+          DEFAULT: '#3f97cc',
           light: '#7BC25C',
           dark: '#4D8A34'
         },

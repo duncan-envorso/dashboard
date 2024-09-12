@@ -24,6 +24,7 @@ interface Notification {
   expiration_date?: string
   delivered?: number
   clicked?: number
+  opened?: number
   status: string
 }
 
@@ -53,7 +54,7 @@ const columns: ColumnDef<Notification>[] = [
   },
   {
     accessorKey: 'sending_at',
-    header: 'Sending at',
+    header: 'Scheduled for',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
         {row.getValue('sending_at') ? new Date(row.getValue('sending_at')).toLocaleString() : 'N/A'}
@@ -62,7 +63,7 @@ const columns: ColumnDef<Notification>[] = [
   },
   {
     accessorKey: 'expiration_date',
-    header: 'Expires at',
+    header: 'Expiration Date',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
         {row.getValue('expiration_date') ? new Date(row.getValue('expiration_date')).toLocaleString() : 'N/A'}
@@ -83,19 +84,26 @@ const columns: ColumnDef<Notification>[] = [
       typeof row.getValue('clicked') === 'number' ? row.getValue('clicked') : 'N/A'
     ),
   },
+  {
+    accessorKey: 'opened',
+    header: 'Opened',
+    cell: ({ row }) => (
+      typeof row.getValue('opened') === 'number' ? row.getValue('opened') : 'N/A'
+    ),
+  },
 ]
 
-export default function SentNotificationsTable() {
+export default function CancelledNotificationsTable() {
   const { notifications, loading, error } = useNotifications()
   const [sorting, setSorting] = React.useState<SortingState>([])
 
-  const completedNotifications = React.useMemo(() => 
-    notifications.filter(notification => notification.status === "Completed"),
+  const cancelledNotifications = React.useMemo(() => 
+    notifications.filter(notification => notification.status === "Canceled"),
     [notifications]
   )
 
   const table = useReactTable({
-    data: completedNotifications,
+    data: cancelledNotifications,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -109,10 +117,10 @@ export default function SentNotificationsTable() {
   if (error) return <div>Error: {error}</div>
 
   return (
-    <Card className="m-5 border-l-4 border-l-green shadow-md dark:bg-navy-light overflow-hidden">
-      <CardHeader className="bg-navy dark:bg-navy-dark text-white">
-        <CardTitle className="text-2xl font-industry font-bold">Completed Notifications</CardTitle>
-        <CardDescription className="text-light-grey dark:text-gray-300">View all completed in-app notifications</CardDescription>
+    <Card className="m-5 border-l-4 border-l-green shadow-md -light overflow-hidden">
+      <CardHeader className="bg-navy  text-white">
+        <CardTitle className="text-2xl font-industry font-bold">Cancelled Notifications</CardTitle>
+        <CardDescription className="text-light-grey ">View all cancelled in-app notifications</CardDescription>
       </CardHeader>
       <CardContent className="mt-4 overflow-x-auto">
         <Table>
@@ -123,7 +131,7 @@ export default function SentNotificationsTable() {
                   return (
                     <TableHead
                       key={header.id}
-                      className="text-navy rounded dark:text-white cursor-pointer"
+                      className="text-navy rounded  cursor-pointer"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -147,7 +155,7 @@ export default function SentNotificationsTable() {
                   className="hover:bg-green/10 rounded dark:hover:bg-green/20"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="dark:text-white">
+                    <TableCell key={cell.id} className="">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -156,7 +164,7 @@ export default function SentNotificationsTable() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No completed notifications.
+                  No cancelled notifications.
                 </TableCell>
               </TableRow>
             )}
