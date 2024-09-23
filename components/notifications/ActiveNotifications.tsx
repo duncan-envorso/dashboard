@@ -81,7 +81,7 @@ export default function ActiveNotifications() {
   const { notifications, loading, error } = useNotifications()
   const [sorting, setSorting] = React.useState<SortingState>([])
 
-  const activeNotifications = React.useMemo(() => 
+  const activeNotifications = React.useMemo(() =>
     notifications.filter(notification => notification.status === "Active"),
     [notifications]
   )
@@ -101,27 +101,27 @@ export default function ActiveNotifications() {
   if (error) return <div>Error: {error}</div>
 
   return (
-    <Card className="m-5 border-l-4 border-l-green shadow-md -light overflow-hidden">
-      <CardHeader className="bg-navy  text-white">
+    <Card className="m-5 border-l-4 border-l-primary shadow-md overflow-hidden">
+      <CardHeader className="bg-primary text-primary-foreground">
         <CardTitle className="text-2xl font-industry font-bold">Active Notifications</CardTitle>
-        <CardDescription className="text-light-grey ">View all active in-app notifications</CardDescription>
+        <CardDescription className="text-primary-foreground/80">View all active in-app notifications</CardDescription>
       </CardHeader>
       <CardContent className="mt-4 overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="bg-green/20 mt-2 p-2 rounded dark:bg-green/30">
+              <TableRow key={headerGroup.id} className="bg-secondary/20 mt-2 p-2 rounded dark:bg-secondary/30">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
-                      className="text-navy rounded  cursor-pointer"
+                      className="text-foreground rounded cursor-pointer"
                       onClick={header.column.getToggleSortingHandler()}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getIsSorted() && (
-                        header.column.getIsSorted() === 'asc' 
-                          ? <ChevronUp className="inline ml-1" /> 
+                        header.column.getIsSorted() === 'asc'
+                          ? <ChevronUp className="inline ml-1" />
                           : <ChevronDown className="inline ml-1" />
                       )}
                     </TableHead>
@@ -136,7 +136,7 @@ export default function ActiveNotifications() {
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-green/10 rounded dark:hover:bg-green/20"
+                  className="hover:bg-secondary/10 rounded dark:hover:bg-secondary/20"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="">
@@ -148,7 +148,7 @@ export default function ActiveNotifications() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  No active notifications.
                 </TableCell>
               </TableRow>
             )}

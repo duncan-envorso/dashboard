@@ -52,7 +52,7 @@ export interface MessageConfig {
   createdAt: string | number | Date;
   createdBy: string;
   updatedAt: string | number | Date;
-  
+
 }
 
 export type ModalSchedulingStatus =
@@ -65,26 +65,38 @@ export type ModalSchedulingStatus =
 
 
 
-  export type Notification = {
-    id: string;
-    type: 'Modal' | 'Toast' | 'Image'; // Assuming these are the possible types
-    title: string;
-    body: string;
-    image_url?: string; // Optional, as it's only applicable for certain types
-    expiration_date: string; // ISO 8601 date-time string
-    button_text?: string; // Optional, as it's only for Modal type
-    button_text_color?: string; // Optional, as it's only for Modal type
-    button_background_color?: string; // Optional, as it's only for Modal type
-    text_color: string;
-    background_color: string;
-    created_at: string; // ISO 8601 date-time string
-    created_by: string;
-    sending_at?: string; // ISO 8601 date-time string, optional
-    expires_at: string; // ISO 8601 date-time string
-    delivered?: number; // Optional, as it might not be available for all notifications
-    clicked?: number; // Optional, as it might not be available for all notifications
-  };
-  
-  // If you need an array type:
-  export type Notifications = Notification[];
+export type Notification = {
+  id: string;
+  type: 'Modal' | 'Toast' | 'Image';
+  title: string;
+  body: string;
+  image_url?: string;
+  expiration_date: string;
+  button_text?: string;
+  button_text_color?: string;
+  button_background_color?: string;
+  text_color: string;
+  background_color: string;
+  created_at: string;
+  created_by: string;
+  sending_at?: string;
+  expires_at: string;
+  delivered?: number;
+  clicked?: number;
+};
 
+export type Notifications = Notification[];
+
+
+
+export interface BlogPost {
+  featuredImage?: string;
+  excerpt?: string;
+  slug?: string;
+  content?: string;
+  id: number;
+  title: string;
+  author: string;
+  status: 'published' | 'draft' | 'archived';
+  createdAt: string;
+}

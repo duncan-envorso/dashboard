@@ -34,7 +34,7 @@ const NotificationsHeader: React.FC<NotificationsHeaderProps> = ({ handleAdd }) 
         </nav>
         <Button 
           size="sm" 
-          variant="outline" 
+          variant="expandIcon" 
           className="bg-background text-foreground border-muted-foreground hover:bg-muted-foreground"
           onClick={handleAdd}
         >

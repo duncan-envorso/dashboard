@@ -175,47 +175,43 @@ const NotificationsTable: React.FC = () => {
   };
 
   return (
-    <div className="bg-light-grey  min-h-screen">
+    <div className="bg-background min-h-screen">
       <NotifcationsHeader handleAdd={handleAdd} />
       <Tabs defaultValue="all">
-        <TabsList className="bg-white -light">
+        <TabsList className="bg-card">
           <TabsTrigger
             value="all"
-            className="data-[state=active]:bg-green data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             All
           </TabsTrigger>
           <TabsTrigger
             value="active"
-            className="data-[state=active]:bg-green data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Active
           </TabsTrigger>
           <TabsTrigger
             value="draft"
-            className="data-[state=active]:bg-green data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Drafts
           </TabsTrigger>
           <TabsTrigger
             value="scheduled"
-            className="data-[state=active]:bg-green data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Scheduled
           </TabsTrigger>
-
           <TabsTrigger
             value="completed"
-            className="data-[state=active]:bg-green data-[state=active]:text-white"
+            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
           >
             Completed
           </TabsTrigger>
-         
         </TabsList>
         <TabsContent value="all">
-          <NotificationsCard
-
-          />
+          <NotificationsCard />
         </TabsContent>
         <TabsContent value="completed">
           <SentNotificationsTable />
@@ -232,15 +228,15 @@ const NotificationsTable: React.FC = () => {
       </Tabs>
 
       <NotificationTypeDialog
-  isAddScreenOpen={isAddScreenOpen}
-  setIsAddScreenOpen={setIsAddScreenOpen}
-  handleAddOption={handleAddOption}
-/>
+        isAddScreenOpen={isAddScreenOpen}
+        setIsAddScreenOpen={setIsAddScreenOpen}
+        handleAddOption={handleAddOption}
+      />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:min-w-[800px] shadow-xl border-2  border-green bg-white -light">
+        <DialogContent className="sm:min-w-[800px] shadow-xl border-2 border-primary bg-card">
           <DialogHeader>
-            <DialogTitle className="text-navy  font-industry font-bold">
+            <DialogTitle className="text-foreground font-industry font-bold">
               {selectedNotication ? 'Edit In-App Notification' : 'Add In-App Notification'}
             </DialogTitle>
           </DialogHeader>
@@ -252,10 +248,9 @@ const NotificationsTable: React.FC = () => {
               onSave={(updatedConfig: MessageConfig) => {
                 handleSave(updatedConfig);
                 handleCloseDialog();
-
               }}
               teamId="034db172-942f-48b8-bc91-a0b3eb3a025f"
-              onNotificationSent={(status) => handleNotificationSent(status, 0)} // Updated this line
+              onNotificationSent={(status) => handleNotificationSent(status, 0)}
             />
           )}
         </DialogContent>

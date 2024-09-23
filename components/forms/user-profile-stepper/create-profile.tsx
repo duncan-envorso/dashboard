@@ -398,7 +398,7 @@ export const CreateProfileOne: React.FC<ProfileFormType> = ({
                         {`Work Experience ${index + 1}`}
 
                         <Button
-                          variant="outline"
+                          variant="expandIcon"
                           size="icon"
                           className="absolute right-8"
                           onClick={() => remove(index)}

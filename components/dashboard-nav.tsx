@@ -43,8 +43,8 @@ export function DashboardNav({ items, setOpen }: DashboardNavProps) {
                     className={cn(
                       'flex items-center gap-2 rounded-md py-2 text-sm font-medium transition-colors duration-200',
                       isActive
-                        ? 'bg-green text-white'
-                        : 'text-white hover:bg-green hover:text-white',
+                        ? 'bg-accent text-secondary-foreground'
+                        : 'text-primary-foreground hover:bg-secondary hover:text-secondary-foreground',
                       item.disabled && 'cursor-not-allowed opacity-80'
                     )}
                     onClick={() => {
@@ -53,7 +53,7 @@ export function DashboardNav({ items, setOpen }: DashboardNavProps) {
                   >
                     <Icon className={cn(
                       'ml-3 h-5 w-5 flex-shrink-0',
-                      isActive ? 'text-white' : 'text-white'
+                      isActive ? 'text-secondary-foreground' : 'text-primary-foreground'
                     )} />
                     {!isMinimized && (
                       <span className="truncate">{item.title}</span>
@@ -66,7 +66,7 @@ export function DashboardNav({ items, setOpen }: DashboardNavProps) {
                   sideOffset={8}
                   className={cn(
                     !isMinimized ? 'hidden' : 'inline-block',
-                    'bg-white text-navy border border-green'
+                    'bg-background text-foreground border border-primary'
                   )}
                 >
                   {item.title}

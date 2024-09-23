@@ -32,7 +32,7 @@ export default function Sidebar({ className }: SidebarProps) {
       className={cn(
         `relative hidden h-screen flex-col border-r transition-all duration-300 ease-in-out md:flex`,
         isMinimized ? 'w-[72px]' : 'w-72',
-        'bg-navy text-white ',
+        'bg-primary text-primary-foreground',
         className
       )}
     >
@@ -40,7 +40,7 @@ export default function Sidebar({ className }: SidebarProps) {
         <Link href="/">
           <Image
             src="/images/Chicago_hounds_logo.png"
-            alt="Seattle Seawolves"
+            alt="Chicago Hounds"
             width={isMinimized ? 40 : 90}
             height={isMinimized ? 40 : 90}
           />
@@ -50,7 +50,7 @@ export default function Sidebar({ className }: SidebarProps) {
         variant="ghost"
         size="icon"
         className={cn(
-          'absolute -right-3 top-20 z-50 rounded-full border bg-green text-white hover:bg-green-dark transition-colors',
+          'absolute -right-3 top-20 z-50 rounded-full border bg-secondary text-secondary-foreground hover:bg-accent transition-colors',
           isMinimized && 'rotate-180'
         )}
         onClick={handleToggle}
@@ -69,7 +69,7 @@ export default function Sidebar({ className }: SidebarProps) {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute bottom-5 left-5 text-navy  hover:bg-green hover:text-white dark:hover:bg-green dark:hover:text-navy"
+        className="absolute bottom-5 left-5 text-primary-foreground hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-accent dark:hover:text-accent-foreground"
         onClick={toggleTheme}
       >
         <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />

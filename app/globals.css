@@ -1,86 +1,161 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import 'react-datepicker/dist/react-datepicker.css';
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --primary: 221 83% 18%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 114 45% 48%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --accent: 114 45% 48%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 100% 50%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 114 45% 48%;
+    /* Main colors */
+    --background: 0 0% 100%;  /* White */
+    --foreground: 152 100% 20%;  /* Dark green (#00653C) */
+    
+    /* Primary colors */
+    --primary: 152 100% 20%;  /* Dark green (#00653C) */
+    --primary-foreground: 0 0% 100%;  /* White */
+    
+    /* Secondary colors */
+     /* Secondary colors */
+     --secondary: 152 100% 25%;  /* Slightly lighter green */
+     --secondary-foreground: 0 0% 100%;  /* White */
+     
+     /* Accent colors */
+     --accent: 199 100% 50%;  /* Light blue from the logo */
+     --accent-foreground: 0 0% 100%;  /* White */
+    
+    /* Muted colors */
+    --muted: 152 30% 90%;  /* Very light green */
+    --muted-foreground: 152 100% 15%;  /* Darker green */
+    
+    /* Card colors */
+    --card: 0 0% 100%;  /* White */
+    --card-foreground: 152 100% 20%;  /* Dark green (#00653C) */
+    
+    /* Popover colors */
+    --popover: 0 0% 100%;  /* White */
+    --popover-foreground: 152 100% 20%;  /* Dark green (#00653C) */
+    
+    /* Border and input colors */
+    --border: 152 30% 80%;  /* Light green */
+    --input: 152 30% 80%;  /* Light green */
+    
+    /* Destructive colors */
+    --destructive: 0 85% 60%;  /* Red */
+    --destructive-foreground: 0 0% 100%;  /* White */
+    
+    /* Ring color */
+    --ring: 152 100% 20%;  /* Dark green (#00653C) */
+    
+    /* Radius */
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 224 71% 4%;
-    --foreground: 213 31% 91%;
-    --muted: 223 47% 11%;
-    --muted-foreground: 215.4 16.3% 56.9%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 215 20.2% 65.1%;
-    --card: 224 71% 4%;
-    --card-foreground: 213 31% 91%;
-    --border: 216 34% 17%;
-    --input: 216 34% 17%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 1.2%;
-    --secondary: 114 45% 48%;
-    --secondary-foreground: 210 40% 98%;
-    --accent: 114 45% 48%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --ring: 114 45% 48%;
+    /* Dark theme variables */
+    --background: 253 43% 3%;
+    --foreground: 253 31% 98%;
+    --muted: 253 7% 13%;
+    --muted-foreground: 253 13% 63%;
+    --popover: 253 43% 3%;
+    --popover-foreground: 253 31% 98%;
+    --card: 253 43% 4%;
+    --card-foreground: 253 31% 99%;
+    --border: 215 27.9% 16.9%;
+    --input: 215 27.9% 16.9%;
+    --primary: 253 91% 58%;
+    --primary-foreground: 253 91% 98%;
+    --secondary: 253 7% 9%;
+    --secondary-foreground: 253 7% 69%;
+    --accent: 253 13% 14%;
+    --accent-foreground: 253 13% 74%;
+    --destructive: 339.2 90.36% 51.18%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 253 91% 58%;
   }
-}
 
-@layer base {
-  * {
-    @apply border-border;
+  /* Chart colors can be kept if needed */
+  :root {
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
   }
-  body {
-    @apply bg-background text-foreground font-industry;
+
+  .dark {
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
   }
 }
 
 @layer components {
-  .btn-primary {
-    @apply bg-navy text-white hover:bg-navy/90;
-  }
-  .btn-secondary {
-    @apply bg-green text-white hover:bg-green-dark;
-  }
-  .btn-outline {
-    @apply border-2 border-navy text-navy hover:bg-navy hover:text-white;
-  }
-  .link {
-    @apply text-green hover:text-green-dark underline;
-  }
+  
+
   .card {
-    @apply bg-white shadow-md rounded-lg border-l-4 border-l-green;
+    @apply bg-card text-card-foreground rounded-lg shadow-md transition-all duration-300 hover:shadow-lg;
   }
-  .nav-item {
-    @apply text-navy hover:text-green transition-colors duration-200;
+  .prose h1 {
+    @apply text-4xl font-bold mb-4 mt-6;
+  }
+  .prose h2 {
+    @apply text-3xl font-bold mb-3 mt-5;
+  }
+  .prose h3 {
+    @apply text-2xl font-bold mb-2 mt-4;
+  }
+  .prose p {
+    @apply mb-4;
+  }
+  .prose ul {
+    @apply list-disc list-outside mb-4 pl-5;
+  }
+  .prose ol {
+    @apply list-decimal list-outside mb-4 pl-5;
+  }
+  .prose li {
+    @apply mb-2;
+  }
+  .prose a {
+    @apply text-blue-600 hover:underline;
+  }
+}
+
+@layer base {
+
+
+  html {
+    font-size: 0.875rem;
+    font-family: 'Inter', sans-serif;
+  }
+  h1 {
+    @apply text-4xl font-extrabold tracking-tight;
+  }
+  h2 {
+    @apply text-3xl font-bold tracking-tight;
+  }
+  h3 {
+    @apply text-2xl font-semibold;
   }
 }
 
 @layer utilities {
+  .scale-small {
+    @apply transform scale-90; /* Scale everything to 90% */
+
+  }
+  .bg-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2300653C' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-1;
+  }
+  .active-shrink {
+    @apply transition-transform duration-150 active:scale-95;
+  }
+  .glassmorphism {
+    @apply bg-white/30 backdrop-blur-md border border-white/20 shadow-lg;
+  }
   .min-h-screen {
     min-height: 100vh; /* Fallback */
     min-height: 100dvh;
@@ -89,25 +164,13 @@
     height: 100vh; /* Fallback */
     height: 100dvh;
   }
-}
-
-@font-face {
-  font-family: 'Industry';
-  src: url('/fonts/Industry-Book.woff2') format('woff2');
-  font-weight: normal;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Industry';
-  src: url('/fonts/Industry-Demi.woff2') format('woff2');
-  font-weight: 600;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Industry';
-  src: url('/fonts/Industry-Ultra.woff2') format('woff2');
-  font-weight: 800;
-  font-style: normal;
-}
+  .transition-smooth {
+    @apply transition-all duration-300 ease-in-out;
+  }
+  .btn-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:from-primary/90 hover:to-secondary/90;
+  }
+  .accent-gradient {
+    @apply bg-gradient-to-r from-accent to-accent/80;
+  }
+} 
