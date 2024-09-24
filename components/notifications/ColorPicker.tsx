@@ -20,7 +20,7 @@ export default function ColorPicker({ label, value, onChange }: ColorPickerProps
       <Popover>
         <PopoverTrigger asChild>
           <Button
-            variant="expandIcon"
+            variant="outline"
             className="w-full justify-start text-left font-normal"
           >
             <div className="flex items-center gap-2">

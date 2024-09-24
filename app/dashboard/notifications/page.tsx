@@ -6,8 +6,7 @@ export default async function NotificationsPage() {
 
 
   return (
-    <div>
-
+    <div className=''>
       <NotificationsTable />
     </div>
   )

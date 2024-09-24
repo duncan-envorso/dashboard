@@ -109,7 +109,7 @@ export function DataTable<TData, TValue>({
         </div>
         <div className="space-x-2">
           <Button
-            variant="expandIcon"
+            variant="outline"
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
@@ -117,7 +117,7 @@ export function DataTable<TData, TValue>({
             Previous
           </Button>
           <Button
-            variant="expandIcon"
+            variant="outline"
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}

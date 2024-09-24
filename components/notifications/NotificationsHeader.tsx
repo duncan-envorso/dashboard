@@ -10,7 +10,7 @@ interface NotificationsHeaderProps {
 
 const NotificationsHeader: React.FC<NotificationsHeaderProps> = ({ handleAdd }) => {
   return (
-    <header className="bg-background">
+    <header className="">
       <div className="flex items-center justify-between px-4 py-2">
         <nav className="flex items-center space-x-2 text-sm text-muted-foreground">
           <Link href="/" className="hover:text-primary">
@@ -24,7 +24,7 @@ const NotificationsHeader: React.FC<NotificationsHeaderProps> = ({ handleAdd }) 
           <Input
             type="search"
             placeholder="Search..."
-            className="w-full rounded-lg bg-background text-foreground pl-8 py-1.5 border border-muted-foreground"
+            className="w-full rounded-lg  text-foreground pl-8 py-1.5 border border-muted-foreground"
           />
         </div>
       </div>
@@ -34,7 +34,7 @@ const NotificationsHeader: React.FC<NotificationsHeaderProps> = ({ handleAdd }) 
         </nav>
         <Button 
           size="sm" 
-          variant="expandIcon" 
+          variant="outline" 
           className="bg-background text-foreground border-muted-foreground hover:bg-muted-foreground"
           onClick={handleAdd}
         >

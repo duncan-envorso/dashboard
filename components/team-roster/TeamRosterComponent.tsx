@@ -52,9 +52,8 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [activeTab, setActiveTab] = useState('all')
 
-   console.log(apiFormattedData)
 
-  
+
 
     const filteredMembers = useMemo(() => {
         const players = apiFormattedData?.players || []
@@ -66,7 +65,7 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
         } else if (activeTab === 'coaches') {
             return coaches
         } else {
-            return players.filter(player => 
+            return players.filter(player =>
                 player.position_group_id === parseInt(activeTab)
             )
         }
@@ -95,7 +94,7 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
     }
 
     return (
-        <div className="bg-background min-h-screen">
+        <div className="bg-slate-100 min-h-screen">
             <div className="container mx-auto p-4">
                 <div className="flex justify-between items-center mb-6">
                     <h1 className="text-3xl font-bold text-foreground">Team Roster Dashboard</h1>
@@ -104,7 +103,7 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
                     </Button>
                 </div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="bg-card">
+                    <TabsList className="bg-slate-100">
                         <TabsTrigger
                             value="all"
                             className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -129,7 +128,7 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
                     </TabsList>
                     <TabsContent value={activeTab}>
                         <ScrollArea className="h-[calc(100vh-200px)]">
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-6">
                                 {filteredMembers.map((member) => (
                                     <Card key={member.id} className="overflow-hidden bg-card shadow-lg hover:shadow-xl transition-shadow duration-300">
                                         <div className="relative">
@@ -235,8 +234,8 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
                         </div>
                     )}
                     <div className="flex justify-end">
-                        <Button 
-                            onClick={handleSave} 
+                        <Button
+                            onClick={handleSave}
                             className="bg-primary text-primary-foreground"
                             disabled={!editingMember}
                         >

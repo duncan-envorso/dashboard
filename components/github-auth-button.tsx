@@ -12,7 +12,7 @@ export default function GithubSignInButton() {
   return (
     <Button
       className="w-full"
-      variant="expandIcon"
+      variant="outline"
       type="button"
       onClick={() =>
         signIn('github', { callbackUrl: callbackUrl ?? '/dashboard' })

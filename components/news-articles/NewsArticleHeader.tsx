@@ -29,7 +29,7 @@ const NewsArticleHeader: React.FC = () => {
                 <nav className="flex space-x-4">
                     {/* Add navigation items here if needed */}
                 </nav>
-                <Button size="sm" variant="expandIcon" className="bg-background text-foreground border-muted-foreground hover:bg-muted-foreground">
+                <Button size="sm" variant="outline" className="bg-background text-foreground border-muted-foreground hover:bg-muted-foreground">
                     <PlusIcon className="h-3.5 w-3.5 mr-1" />
                     Add
                 </Button>

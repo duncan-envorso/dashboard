@@ -8,7 +8,7 @@ import { getPosts } from '@/app/actions'
 export default async function PostsPage() {
   const posts = await getPosts()
   return (
-    <div className="p-8 bg-pattern min-h-screen">
+    <div className=" bg-pattern min-h-screen">
       <Suspense fallback={<div>Loading...</div>}>
       <BlogPostList initialPosts={posts} />
       </Suspense>

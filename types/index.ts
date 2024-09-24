@@ -100,3 +100,45 @@ export interface BlogPost {
   status: 'published' | 'draft' | 'archived';
   createdAt: string;
 }
+
+export interface NewsPost {
+  id: number;
+  date: string;
+  date_gmt: string;
+  featured_image_url: string;
+  guid: {
+    rendered: string;
+  };
+  modified: string;
+  modified_gmt: string;
+  slug: string;
+  status: string;
+  type: string;
+  link: string;
+  title: {
+    rendered: string;
+  };
+  content: {
+    rendered: string;
+    protected: boolean;
+  };
+  excerpt: {
+    rendered: string;
+    protected: boolean;
+  };
+  author: number;
+  featured_media: number;
+  comment_status: string;
+  ping_status: string;
+  sticky: boolean;
+  template: string;
+  format: string;
+  meta: {
+    _acf_changed: boolean;
+    _EventAllDay: boolean;
+    _EventTimezone: string;
+    _EventStartDate: string;
+    _EventEndDate: string;
+    [key: string]: any; // For any additional meta fields
+  };
+}

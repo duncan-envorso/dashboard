@@ -31,29 +31,8 @@ export default function NewPostPage() {
   }
 
   return (
-    <div className="p-4 md:p-8">
-      <Card className="w-full hover-lift glassmorphism">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <div>
-              <CardTitle className="text-3xl font-bold tracking-tight text-primary">Create New Blog Post</CardTitle>
-              <CardDescription className="text-muted-foreground">Write and publish your new blog post here.</CardDescription>
-            </div>
-            <Button
-              onClick={handleGoBack}
-              variant="outline"
-              size="sm"
-              className="hover:bg-primary/90 active-shrink transition-smooth"
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Go Back
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <BlogEditor />
-        </CardContent>
-      </Card>
+    <div className="">
+     <BlogEditor goBack={handleGoBack} />
 
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>

@@ -65,7 +65,7 @@ export default function Dashboard() {
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {pages.map((page) => (
-                <Card key={page.title} className="flex flex-col border-l-4 border-l-primary">
+                <Card key={page.title} className="flex flex-col border-l-4 border-l-primary bg-white">
                   <CardHeader>
                     <div className="flex items-center space-x-2">
                       {page.icon}

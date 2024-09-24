@@ -107,10 +107,10 @@ export default function ExpiredNotifications() {
   if (error) return <div>Error: {error}</div>
 
   return (
-    <Card className="m-5 border-l-4 border-l-green shadow-md -light overflow-hidden">
-      <CardHeader className="bg-navy  text-white">
+    <Card className="m-5 shadow-sm bg-white overflow-hidden">
+      <CardHeader className="bg-card text-secondary">
         <CardTitle className="text-2xl font-industry font-bold">Expired Notifications</CardTitle>
-        <CardDescription className="text-light-grey ">View all expired in-app notifications</CardDescription>
+        <CardDescription className="text-primary">View all expired in-app notifications</CardDescription>
       </CardHeader>
       <CardContent className="mt-4 overflow-x-auto">
         <Table>

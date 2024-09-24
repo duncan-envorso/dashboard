@@ -18,10 +18,10 @@ export default function DashboardLayout({
     <SessionProvider>
       <div className="flex h-screen bg-background text-foreground font-industry">
         <Sidebar />
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="just bg-slate-100 flex flex-col items-start justify-start w-full min-h-screen">
           <Header />
-          <ScrollArea className="flex-1 p-6">
-            <div className="max-w-[1200px] mx-auto">
+          <ScrollArea className="w-full">
+            <div className=" m-2">
               {children}
             </div>
           </ScrollArea>

@@ -289,7 +289,7 @@ export function EmployeeTable<TData, TValue>({
           <div className="flex items-center space-x-2">
             <Button
               aria-label="Go to first page"
-              variant="expandIcon"
+              variant="outline"
               className="hidden h-8 w-8 p-0 lg:flex"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
@@ -298,7 +298,7 @@ export function EmployeeTable<TData, TValue>({
             </Button>
             <Button
               aria-label="Go to previous page"
-              variant="expandIcon"
+              variant="outline"
               className="h-8 w-8 p-0"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
@@ -307,7 +307,7 @@ export function EmployeeTable<TData, TValue>({
             </Button>
             <Button
               aria-label="Go to next page"
-              variant="expandIcon"
+              variant="outline"
               className="h-8 w-8 p-0"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
@@ -316,7 +316,7 @@ export function EmployeeTable<TData, TValue>({
             </Button>
             <Button
               aria-label="Go to last page"
-              variant="expandIcon"
+              variant="outline"
               className="hidden h-8 w-8 p-0 lg:flex"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}

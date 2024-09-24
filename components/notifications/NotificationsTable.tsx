@@ -1,6 +1,4 @@
 'use client'
-
-import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import NotifcationsHeader from './NotificationsHeader';
 import { toast } from '../ui/use-toast';
@@ -15,8 +13,9 @@ import DraftNotifications from './DraftNotifications';
 import ScheduledNotifications from './ScheduledNotifications';
 import ActiveNotifications from './ActiveNotifications';
 import Image from 'next/image';
-import { Bell, LayoutTemplate } from 'lucide-react';
+import { Bell, LayoutTemplate, Plus } from 'lucide-react';
 import NotificationTypeDialog from './NotifcationTypeDialog';
+import { useState } from "react";
 
 
 
@@ -175,57 +174,48 @@ const NotificationsTable: React.FC = () => {
   };
 
   return (
-    <div className="bg-background min-h-screen">
-      <NotifcationsHeader handleAdd={handleAdd} />
-      <Tabs defaultValue="all">
-        <TabsList className="bg-card">
-          <TabsTrigger
-            value="all"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            All
-          </TabsTrigger>
-          <TabsTrigger
-            value="active"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Active
-          </TabsTrigger>
-          <TabsTrigger
-            value="draft"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Drafts
-          </TabsTrigger>
-          <TabsTrigger
-            value="scheduled"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Scheduled
-          </TabsTrigger>
-          <TabsTrigger
-            value="completed"
-            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-          >
-            Completed
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="all">
-          <NotificationsCard />
-        </TabsContent>
-        <TabsContent value="completed">
-          <SentNotificationsTable />
-        </TabsContent>
-        <TabsContent value="draft">
-          <DraftNotifications />
-        </TabsContent>
-        <TabsContent value="scheduled">
-          <ScheduledNotifications />
-        </TabsContent>
-        <TabsContent value="active">
-          <ActiveNotifications />
-        </TabsContent>
-      </Tabs>
+    <div className="min-h-screen">
+      <div className="">
+        <div className="flex justify-between items-center mb-6">
+
+
+        </div>
+        <Tabs defaultValue="all" className="w-full ">
+          <TabsList className=" mb-4 p-6 bg-slate-100 flex justify-between items-center">
+            <div className="flex bg-slate-100 ">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="active">Active</TabsTrigger>
+              <TabsTrigger value="draft">Drafts</TabsTrigger>
+              <TabsTrigger value="scheduled">Scheduled</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+            </div>
+            <Button
+              onClick={handleAdd}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="mr-2 h-4 w-4" /> New Notification
+            </Button>
+          </TabsList>
+
+          <div className="bg-slate-100 ">
+            <TabsContent className="" value="all">
+              <NotificationsCard />
+            </TabsContent>
+            <TabsContent value="completed">
+              <SentNotificationsTable />
+            </TabsContent>
+            <TabsContent value="draft">
+              <DraftNotifications />
+            </TabsContent>
+            <TabsContent value="scheduled">
+              <ScheduledNotifications />
+            </TabsContent>
+            <TabsContent value="active">
+              <ActiveNotifications />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
 
       <NotificationTypeDialog
         isAddScreenOpen={isAddScreenOpen}
@@ -234,9 +224,9 @@ const NotificationsTable: React.FC = () => {
       />
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:min-w-[800px] shadow-xl border-2 border-primary bg-card">
+        <DialogContent className="sm:max-w-[800px] bg-card border-primary">
           <DialogHeader>
-            <DialogTitle className="text-foreground font-industry font-bold">
+            <DialogTitle className="text-foreground font-bold">
               {selectedNotication ? 'Edit In-App Notification' : 'Add In-App Notification'}
             </DialogTitle>
           </DialogHeader>

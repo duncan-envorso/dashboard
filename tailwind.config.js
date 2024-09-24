@@ -17,18 +17,9 @@ module.exports = {
       }
     },
     extend: {
-      fontSize : {
-        'xs': '0.75rem',   // Smaller size
-        'sm': '0.875rem',  // Default is 0.875rem (14px)
-      },
-      keyframes: {
-        "shine": {
-          from: { backgroundPosition: '200% 0' },
-          to: { backgroundPosition: '-200% 0' },
-        },
-      },
-      animation: {
-        "shine": "shine 8s ease-in-out infinite",
+      fontSize: {
+        'xs': '0.75rem',
+        'sm': '0.875rem',
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -44,17 +35,17 @@ module.exports = {
           DEFAULT: 'hsl(var(--secondary))',
           foreground: 'hsl(var(--secondary-foreground))'
         },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))'
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))'
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',
           foreground: 'hsl(var(--muted-foreground))'
         },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))'
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))'
         },
         popover: {
           DEFAULT: 'hsl(var(--popover))',
@@ -63,6 +54,10 @@ module.exports = {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
+        },
+        text: {
+          DEFAULT: 'hsl(var(--text))',
+          light: 'hsl(var(--text-light))'
         }
       },
       borderRadius: {
@@ -72,8 +67,8 @@ module.exports = {
       },
       keyframes: {
         "shine": {
-            from: { backgroundPosition: '200% 0' },
-            to: { backgroundPosition: '-200% 0' },
+          from: { backgroundPosition: '200% 0' },
+          to: { backgroundPosition: '-200% 0' },
         },
         'accordion-down': {
           from: { height: 0 },
@@ -92,4 +87,4 @@ module.exports = {
     }
   },
   plugins: [require('tailwindcss-animate')]
-};
+}

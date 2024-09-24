@@ -4,7 +4,7 @@ import React from 'react'
 function NotificationsLayout({ children }: { children: React.ReactNode }) {
     return (
         <NotificationsProvider>
-            <div>{children}</div>
+            <div className=''>{children}</div>
         </NotificationsProvider>
     )
 }
