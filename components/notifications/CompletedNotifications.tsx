@@ -13,20 +13,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useNotifications } from '@/app/contexts/NotifcationsContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChevronUp, ChevronDown } from 'lucide-react'
+import { Notification } from '@/types'
 
-interface Notification {
-  id: string
-  title: string
-  modal_type: string
-  created_at: string
-  created_by: string
-  sending_at?: string
-  expiration_date?: string
-  delivered?: number
-  clicked?: number
-  opened?: number
-  status: string
-}
+
 
 const columns: ColumnDef<Notification>[] = [
   {
@@ -48,20 +37,6 @@ const columns: ColumnDef<Notification>[] = [
     ),
   },
   {
-    accessorKey: 'created_by',
-    header: 'Created By',
-    cell: ({ row }) => row.getValue('created_by') || 'N/A',
-  },
-  {
-    accessorKey: 'sending_at',
-    header: 'Scheduled for',
-    cell: ({ row }) => (
-      <span suppressHydrationWarning>
-        {row.getValue('sending_at') ? new Date(row.getValue('sending_at')).toLocaleString() : 'N/A'}
-      </span>
-    ),
-  },
-  {
     accessorKey: 'expiration_date',
     header: 'Expiration Date',
     cell: ({ row }) => (
@@ -71,34 +46,32 @@ const columns: ColumnDef<Notification>[] = [
     ),
   },
   {
-    accessorKey: 'delivered',
-    header: 'Delivered',
-    cell: ({ row }) => (
-      typeof row.getValue('delivered') === 'number' ? row.getValue('delivered') : 'N/A'
-    ),
+    accessorKey: 'viewed_count',
+    header: 'Viewed',
+    cell: ({ row }) => row.getValue('viewed_count') || '0',
   },
   {
-    accessorKey: 'clicked',
+    accessorKey: 'clicked_count',
     header: 'Clicked',
-    cell: ({ row }) => (
-      typeof row.getValue('clicked') === 'number' ? row.getValue('clicked') : 'N/A'
-    ),
+    cell: ({ row }) => row.getValue('clicked_count') || '0',
   },
   {
-    accessorKey: 'opened',
-    header: 'Opened',
-    cell: ({ row }) => (
-      typeof row.getValue('opened') === 'number' ? row.getValue('opened') : 'N/A'
-    ),
+    accessorKey: 'dismissed_count',
+    header: 'Dismissed',
+    cell: ({ row }) => row.getValue('dismissed_count') || '0',
+  },
+  {
+    accessorKey: 'status',
+    header: 'Status',
   },
 ]
 
-export default function CancelledNotificationsTable() {
+export default function CompletedNotificationsTable() {
   const { notifications, loading, error } = useNotifications()
   const [sorting, setSorting] = React.useState<SortingState>([])
 
   const cancelledNotifications = React.useMemo(() => 
-    notifications.filter(notification => notification.status === "Canceled"),
+    notifications.filter(notification => notification.status === "Completed"),
     [notifications]
   )
 
@@ -118,59 +91,59 @@ export default function CancelledNotificationsTable() {
 
   return (
     <Card className="m-5 shadow-sm bg-white overflow-hidden">
-    <CardHeader className="bg-card text-secondary">
-      <CardTitle className="text-2xl font-industry font-bold">Cancelled Notifications</CardTitle>
-      <CardDescription className="text-primary">View all cancelled in-app notifications</CardDescription>
-    </CardHeader>
-    <CardContent className="mt-4 overflow-x-auto">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="mt-2 p-2 rounded">
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead
-                    key={header.id}
-                    className="text-foreground rounded cursor-pointer"
-                    onClick={header.column.getToggleSortingHandler()}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                    {header.column.getIsSorted() && (
-                      header.column.getIsSorted() === 'asc'
-                        ? <ChevronUp className="inline ml-1" />
-                        : <ChevronDown className="inline ml-1" />
-                    )}
-                  </TableHead>
-                )
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className="hover:bg-secondary/10 rounded dark:hover:"
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+      <CardHeader className="bg-primary/30 backdrop:blur-xl text-secondary">
+        <CardTitle className="text-2xl font-industry font-bold">Cancelled Notifications</CardTitle>
+        <CardDescription className="text-primary">View all cancelled in-app notifications</CardDescription>
+      </CardHeader>
+      <CardContent className="mt-4 overflow-x-auto">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="mt-2 p-2 rounded">
+                {headerGroup.headers.map((header) => {
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className="text-foreground rounded cursor-pointer"
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {header.column.getIsSorted() && (
+                        header.column.getIsSorted() === 'asc'
+                          ? <ChevronUp className="inline ml-1" />
+                          : <ChevronDown className="inline ml-1" />
+                      )}
+                    </TableHead>
+                  )
+                })}
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No cancelled notifications.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </CardContent>
-  </Card>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && "selected"}
+                  className="hover:bg-secondary/10 rounded dark:hover:"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-24 text-center">
+                  No cancelled notifications.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   )
 }

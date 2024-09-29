@@ -46,11 +46,31 @@
     @apply border-border;
   }
   html {
-    font-size: 0.8rem; /* This ensures body text uses the html base font size */
+    font-size: 0.9rem; /* This ensures body text uses the html base font size */
   }
   body {
     @apply box-border bg-background text-foreground;
     font-size: 0.8rem; /* Thise */
+  }
+
+  /* Default sizes for headings */
+  h1 {
+    @apply text-xl font-bold;
+  }
+  h2 {
+    @apply text-lg font-semibold;
+  }
+  h3 {
+    @apply text-base font-semibold;
+  }
+  h4 {
+    @apply text-sm font-semibold;
+  }
+  h5 {
+    @apply text-xs font-medium;
+  }
+  h6 {
+    @apply text-base font-medium;
   }
 }
 

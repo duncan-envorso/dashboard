@@ -28,3 +28,30 @@ export const positionGroups = {
     "3": "Specialist",
     "4": "Staff"
 }
+
+type Team = {
+  name: string;
+  shortName: string;
+  wins: number;
+  losses: number;
+  draws: number;
+  image_path: string;
+};
+
+type Match = {
+  venue: string;
+  start_time: string; // Date as string in ISO format
+  round: number;
+  name: string;
+  match_id: string;
+  match_type: string;
+  home_score: number;
+  away_score: number;
+  homeTeam: Team;
+  awayTeam: Team;
+};
+
+type MatchesData = {
+  upcomingMatchesData: Match[];
+  pastMatchesData: Match[];
+};

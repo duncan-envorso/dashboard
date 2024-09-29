@@ -63,8 +63,8 @@ export default function TeamRosterView({ apiFormattedData }: TeamRosterProps) {
     }, [apiFormattedData, activeTab])
 
     return (
-        <div className="bg-slate-100 min-h-screen">
-            <div className="container mx-auto p-4">
+        <div className="container mx-auto p-4">
+            <div className="w-full bg-slate-100 border-none shadow-none">
                 <h1 className="text-3xl font-bold text-foreground mb-6">Team Roster</h1>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="bg-slate-100">

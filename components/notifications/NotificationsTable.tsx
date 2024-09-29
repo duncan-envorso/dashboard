@@ -1,6 +1,5 @@
 'use client'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import NotifcationsHeader from './NotificationsHeader';
 import { toast } from '../ui/use-toast';
 import ModalComponent from './ModalComponent';
 import NotificationComponent from './NotificationComponent';
@@ -12,8 +11,7 @@ import SentNotificationsTable from './CompletedNotifications';
 import DraftNotifications from './DraftNotifications';
 import ScheduledNotifications from './ScheduledNotifications';
 import ActiveNotifications from './ActiveNotifications';
-import Image from 'next/image';
-import { Bell, LayoutTemplate, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import NotificationTypeDialog from './NotifcationTypeDialog';
 import { useState } from "react";
 
