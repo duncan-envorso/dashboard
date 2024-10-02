@@ -36,11 +36,11 @@ const columns: ColumnDef<Notification>[] = [
     ),
   },
   {
-    accessorKey: 'expiration_date',
+    accessorKey: 'expires_at',
     header: 'Expires at',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
-        {row.original.expiration_date ? new Date(row.original.expiration_date).toLocaleString() : 'N/A'}
+        {row.original.expires_at ? new Date(row.original.expires_at).toLocaleString() : 'N/A'}
       </span>
     ),
   },

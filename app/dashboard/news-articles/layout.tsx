@@ -1,12 +1,14 @@
-export const metadata = {
-  title: 'Blog Posts',
-  description: 'Manage your blog posts',
-}
+import React from "react"
 
-export default function PostsLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return <>{children}</>
-} 
+export const metadata = {
+    title: 'Blog Posts',
+    description: 'Manage your blog posts',
+  }
+  
+  export default function PostsLayout({
+    children,
+  }: {
+    children: React.ReactNode
+  }) {
+    return <>{children}</>
+  } 

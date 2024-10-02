@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { navItems } from '@/constants/data';
 import { cn } from '@/lib/utils';
@@ -10,6 +10,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
 
 type SidebarProps = {
   className?: string;
@@ -18,6 +19,32 @@ type SidebarProps = {
 export default function Sidebar({ className }: SidebarProps) {
   const { isMinimized, toggle } = useSidebar();
   const { theme, setTheme } = useTheme();
+  const { data: session } = useSession();
+  const [logo, setLogo] = useState('/logos/default-logo.png');
+
+  useEffect(() => {
+    const loadLogo = async () => {
+      if (session?.user?.team) {
+        const teamLogoPath = `/logos/${session.user.team}-logo.png`;
+        try {
+          const res = await fetch(teamLogoPath);
+          if (res.ok) {
+            setLogo(teamLogoPath);
+          } else {
+            console.warn(`Team logo not found: ${teamLogoPath}`);
+            setLogo('/logos/default-logo.png');
+          }
+        } catch (error) {
+          console.error('Error loading team logo:', error);
+          setLogo('/logos/default-logo.png');
+        }
+      } else {
+        setLogo('/logos/default-logo.png');
+      }
+    };
+
+    loadLogo();
+  }, [session]);
 
   const handleToggle = () => {
     toggle();
@@ -39,8 +66,8 @@ export default function Sidebar({ className }: SidebarProps) {
       <div className="flex items-center justify-center p-5 pt-10">
         <Link href="/">
           <Image
-            src="/images/Chicago_hounds_logo.png"
-            alt="Chicago Hounds"
+            src={logo}
+            alt="Team Logo"
             width={isMinimized ? 40 : 90}
             height={isMinimized ? 40 : 90}
           />

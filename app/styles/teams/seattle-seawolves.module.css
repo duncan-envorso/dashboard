@@ -1,0 +1,16 @@
+.root {
+    --primary: 220 54% 20%;      /* Dark navy blue */
+    --primary-foreground: 0 0% 100%;  /* White text on primary */
+    --secondary: 135 39% 47%;    /* Green */
+    --secondary-foreground: 0 0% 100%;  /* White text on secondary */
+    --accent: 203 100% 32%;      /* Bright blue accent */
+    --accent-foreground: 0 0% 100%;  /* White text on accent */
+    --destructive: 0 100% 40%;   /* Red for destructive actions */
+    --destructive-foreground: 0 0% 100%;  /* White text on destructive */
+    --ring: 203 100% 32%;        /* Bright blue for focus rings */
+    --chart-1: 220 54% 20%;      /* Navy */
+    --chart-2: 135 39% 47%;      /* Green */
+    --chart-3: 203 100% 32%;     /* Bright blue */
+    --chart-4: 45 100% 50%;      /* Gold/Yellow */
+    --chart-5: 0 0% 80%;         /* Light gray */
+  }

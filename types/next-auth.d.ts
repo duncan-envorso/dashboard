@@ -1,9 +1,13 @@
-import NextAuth, { DefaultSession } from 'next-auth';
+import NextAuth, { DefaultSession, DefaultUser } from 'next-auth';
 
 declare module 'next-auth' {
-  type UserSession = DefaultSession['user'];
-  interface Session {
-    user: UserSession;
+  interface User extends DefaultUser {
+    team?: string;
+    teamId?: string;
+  }
+
+  interface Session extends DefaultSession {
+    user: User & DefaultSession['user'];
   }
 
   interface CredentialsInputs {

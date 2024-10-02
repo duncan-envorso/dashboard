@@ -37,28 +37,28 @@ const columns: ColumnDef<Notification>[] = [
     ),
   },
   {
-    accessorKey: 'expiration_date',
+    accessorKey: 'expires_at',
     header: 'Expires at',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
-        {row.getValue('expiration_date') ? new Date(row.getValue('expiration_date')).toLocaleString() : 'N/A'}
+        {row.getValue('expires_at') ? new Date(row.getValue('expires_at')).toLocaleString() : 'N/A'}
       </span>
     ),
   },
   {
     accessorKey: 'viewed_count',
     header: 'Viewed',
-    cell: ({ row }) => row.getValue('viewed_count') || '0',
+    cell: ({ row }) => row.getValue('viewed_count') || 'NA',
   },
   {
     accessorKey: 'clicked_count',
     header: 'Clicked',
-    cell: ({ row }) => row.getValue('clicked_count') || '0',
+    cell: ({ row }) => row.getValue('clicked_count') || 'NA',
   },
   {
     accessorKey: 'dismissed_count',
     header: 'Dismissed',
-    cell: ({ row }) => row.getValue('dismissed_count') || '0',
+    cell: ({ row }) => row.getValue('dismissed_count') || 'NA',
   },
 ]
 

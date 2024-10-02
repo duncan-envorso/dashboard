@@ -14,64 +14,31 @@
     --card-foreground: 20 51% 3%;
     --border: 20 15% 94%;
     --input: 20 15% 94%;
-    --primary: 152 100% 20%; /* Dark green (#00653C) */
-    --primary-foreground: 0 0% 85%; /* Light grey */
-    --secondary: 0 0% 13%;  /* Very dark grey (#212121) */
-
-
-    --secondary-foreground: 0 0% 90%;  /* Very light grey (#E6E6E6) */
-
-
-    --accent: 201 76% 63%;  /* Bright sky blue (#59B2E7) */
-
-
-    --accent-foreground: 220 17% 20%;  /* Dark grey (#2A2E39) */
-
-    --destructive: 11 80% 22%;
-    --destructive-foreground: 11 80% 82%;
-    --ring: 20 48% 72%;
     --radius: 0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    
+    /* Remove team-specific colors from here */
+    /* They will be set dynamically */
   }
 
-  
-}
-
-@layer base {
   * {
     @apply border-border;
   }
+
   html {
-    font-size: 0.9rem; /* This ensures body text uses the html base font size */
-  }
-  body {
-    @apply box-border bg-background text-foreground;
-    font-size: 0.8rem; /* Thise */
+    font-size: 0.9rem;
   }
 
-  /* Default sizes for headings */
-  h1 {
-    @apply text-xl font-bold;
+  body {
+    @apply box-border bg-background text-foreground;
+    font-size: 0.8rem;
   }
-  h2 {
-    @apply text-lg font-semibold;
-  }
-  h3 {
-    @apply text-base font-semibold;
-  }
-  h4 {
-    @apply text-sm font-semibold;
-  }
-  h5 {
-    @apply text-xs font-medium;
-  }
-  h6 {
-    @apply text-base font-medium;
-  }
+
+  h1 { @apply text-xl font-bold; }
+  h2 { @apply text-lg font-semibold; }
+  h3 { @apply text-base font-semibold; }
+  h4 { @apply text-sm font-semibold; }
+  h5 { @apply text-xs font-medium; }
+  h6 { @apply text-base font-medium; }
 }
 
 @layer components {
@@ -80,17 +47,16 @@
   }
   body {
     @apply box-border bg-background text-foreground;
-    /* make text smaller */
   }
 }
 
 @layer utilities {
   .min-h-screen {
-    min-height: 100vh; /* Fallback */
+    min-height: 100vh;
     min-height: 100dvh;
   }
   .h-screen {
-    height: 100vh; /* Fallback */
+    height: 100vh;
     height: 100dvh;
   }
 }

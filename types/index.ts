@@ -34,7 +34,7 @@ export type SidebarNavItem = NavItemWithChildren;
 
 export interface MessageConfig {
   id: string;
-  teamId: string;
+  teamId?: string 
   modalType: 'Modal' | 'Image' | 'Toast';
   textColor: string;
   title: string;
@@ -66,12 +66,13 @@ export type ModalSchedulingStatus =
 
 
 export type Notification = {
+  status: string;
   id: string;
+
   type: 'Modal' | 'Toast' | 'Image';
   title: string;
   body: string;
   image_url?: string;
-  expiration_date: string;
   button_text?: string;
   button_text_color?: string;
   button_background_color?: string;

@@ -61,7 +61,7 @@ export default function FileUpload({
       <div>
         {value.length < IMG_MAX_LIMIT && (
           <UploadDropzone<OurFileRouter>
-            className="ut-label:text-sm ut-allowed-content:ut-uploading:text-red-300 py-2 "
+            className="ut-label:text-sm ut-allowed-content:ut-uploading:text-red-300 py-2 dark:bg-zinc-800"
             endpoint="imageUploader"
             config={{ mode: 'auto' }}
             content={{

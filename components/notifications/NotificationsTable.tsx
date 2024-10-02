@@ -14,6 +14,7 @@ import ActiveNotifications from './ActiveNotifications';
 import { Plus } from 'lucide-react';
 import NotificationTypeDialog from './NotifcationTypeDialog';
 import { useState } from "react";
+import NotificationConfig from "./ModalComponent";
 
 
 
@@ -124,52 +125,6 @@ const NotificationsTable: React.FC = () => {
     setSelectedOption(null);
   };
 
-  const handleSend = async (notification: MessageConfig, index: number) => {
-    console.log(notification);
-    try {
-      const apiKey = process.env.NEXT_PUBLIC_NOTIFICATION_KEY;
-      const teamId = "034db172-942f-48b8-bc91-a0b3eb3a025f"; // Hardcoded teamId
-      if (!apiKey) {
-        throw new Error('API key is missing');
-      }
-
-      const response = await fetch('https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=3fa85f64-5717-4562-b3fc-2c963f66afa6', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          teamId: teamId,
-          modalType: notification.modalType,
-
-          expirationDate: notification.expirationDate,
-          title: notification.title,
-          image_url: notification.imageUrl,
-          body: notification.body,
-          button_text: notification.buttonText,
-          text_color: notification.textColor,
-          background_color: notification.buttonBackground,
-          button_text_color: notification.buttonTextColor,
-          button_background_color: notification.buttonBackground
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to send in-app modal: ${response.status} ${response.statusText}. ${errorText}`);
-      }
-
-      toast({
-        title: 'In-app modal sent successfully',
-        description: 'Your in-app modal has been sent to the app',
-      });
-
-      handleNotificationSent('Scheduled', index);
-    } catch (error) {
-      console.error('Error sending in-app modal:', error);
-      handleNotificationSent('Failed', index);
-    }
-  };
 
   return (
     <div className="min-h-screen">
@@ -231,13 +186,13 @@ const NotificationsTable: React.FC = () => {
           {selectedOption === 'push' ? (
             <NotificationComponent />
           ) : (
-            <ModalComponent
+            <NotificationConfig
               config={selectedNotication as MessageConfig}
               onSave={(updatedConfig: MessageConfig) => {
                 handleSave(updatedConfig);
                 handleCloseDialog();
               }}
-              teamId="034db172-942f-48b8-bc91-a0b3eb3a025f"
+           
               onNotificationSent={(status) => handleNotificationSent(status, 0)}
             />
           )}

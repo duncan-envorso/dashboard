@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import moment from 'moment-timezone';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
-import { CalendarIcon, Clock3Icon, InfoIcon } from 'lucide-react';
+import { CalendarIcon, Clock3Icon } from 'lucide-react';
 import DevicePreview from './DevicePreview';
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -13,49 +13,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { MessageConfig } from '@/types';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import ExpirationDateSelect from './ExpirationDateSelect';
+import { useSession } from 'next-auth/react';
 
 interface NotificationsComponentProps {
   config?: Partial<MessageConfig>;
   onSave: (config: MessageConfig) => void;
-  teamId: string;
   onNotificationSent: (status: "Scheduled" | "Draft" | "Failed" | "Active" | "Completed" | "Canceled" | "Deleted") => void;
 }
+
 const defaultConfig: MessageConfig = {
   modalType: 'Modal',
   teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
   textColor: '#000000',
   title: 'Major League Rugby Back of the Year 2024',
-  body: 'The New England Free Jacks’ 2024 season will be remembered for its exhilarating highs, and much of that success can be attributed to the electrifying performances of Reece MacDonald. ',
+  body: `The New England Free Jacks' 2024 season will be remembered for its exhilarating highs, and much of that success can be attributed to the electrifying performances of Reece MacDonald. `,
   imageUrl: 'https://freejacks.com/wp-content/uploads/2024/08/Reece-1.jpg',
   buttonText: 'Read More',
   buttonBackground: '#24613a',
   buttonTextColor: '#ffffff',
-  scheduledDate: new Date(Date.now() + 60 * 60 * 1000).toISOString(), // 1 hour from now
-  scheduledTime: new Date(Date.now() + 60 * 60 * 1000).toTimeString().slice(0, 5), // HH:MM format
-  expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+  scheduledDate: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  scheduledTime: new Date(Date.now() + 60 * 60 * 1000).toTimeString().slice(0, 5),
+  expirationDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
   timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  status: 'Draft', // Add status field with default value 'Draft'
-  id: '', // Add default value for id
-  createdAt: new Date().toISOString(), // Add default value for createdAt
-  createdBy: '', // Add default value for createdBy
-  updatedAt: new Date().toISOString(), // Add default value for updatedAt
+  status: 'Draft',
+  id: '',
+  createdAt: new Date().toISOString(),
+  createdBy: '',
+  updatedAt: new Date().toISOString(),
 };
 
-export default function NotificationConfig({ config, onSave, teamId, onNotificationSent }: NotificationsComponentProps) {
-  const [localConfig, setLocalConfig] = useState<MessageConfig>({
-    ...defaultConfig,
-    ...config
-  });
+export default function NotificationConfig({ config, onSave, onNotificationSent }: NotificationsComponentProps) {
+  const { data: session } = useSession();
+
   const [notificationStatus, setNotificationStatus] = useState<string | null>(null);
   const [timeUntilSend, setTimeUntilSend] = useState<string>('');
 
-  const calculateExpirationDate = (days: number) => {
-    const date = new Date();
-    date.setDate(date.getDate() + days);
-    return date.toISOString();
-  };
 
+  const [localConfig, setLocalConfig] = useState<MessageConfig>(() => ({
+  ...defaultConfig,
+  ...config,
+  teamId: session?.user?.teamId || defaultConfig.teamId
+}));
+
+useEffect(() => {
+  if (session?.user?.teamId) {
+    setLocalConfig(prev => ({ ...prev, teamId: session.user.teamId }));
+  }
+}, [session]);
+
+  
+  
   useEffect(() => {
     const updateTimeUntilSend = () => {
       const now = new Date();
@@ -72,24 +80,32 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
     };
 
     updateTimeUntilSend();
-    const interval = setInterval(updateTimeUntilSend, 60000); // Update every minute
+    const interval = setInterval(updateTimeUntilSend, 60000);
 
     return () => clearInterval(interval);
   }, [localConfig.scheduledDate, localConfig.scheduledTime]);
-
+  
   const updateConfig = (key: keyof MessageConfig, value: string | Date | undefined) => {
-    setLocalConfig(prev => ({
-      ...prev,
-      [key]: key === 'scheduledDate' || key === 'expirationDate'
-        ? (value instanceof Date ? value.toISOString() : value)
-        : value
-    }));
+    setLocalConfig(prev => {
+      const updatedConfig = { ...prev };
+      if (key === 'teamId') {
+        updatedConfig[key] = (value as string) || prev.teamId;
+      } else if (key === 'scheduledDate' || key === 'expirationDate') {
+        updatedConfig[key] = value instanceof Date ? value.toISOString() : value;
+      } else if (key === 'createdAt' || key === 'updatedAt') {
+        updatedConfig[key] = value instanceof Date ? value : value ? new Date(value).toISOString() : prev[key];
+      } else {
+        (updatedConfig as any)[key] = value !== undefined ? value : prev[key];
+      }
+      return updatedConfig;
+    });
   };
+
 
   const handleSave = () => {
     const updatedConfig: MessageConfig = {
       ...localConfig,
-      status: 'Draft' as const,
+      status: 'Draft',
       scheduledDate: undefined,
       scheduledTime: undefined,
     };
@@ -104,12 +120,15 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
       if (!apiKey) {
         throw new Error('API key is missing');
       }
+      if (!localConfig.teamId) {
+        throw new Error('Team ID is missing');
+      }
       const scheduledDateTime = moment.tz(
         `${localConfig.scheduledDate?.split('T')[0]}T${localConfig.scheduledTime}`,
         localConfig.timezone || 'UTC'
       ).toISOString();
 
-      const response = await fetch(`https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=${teamId}`, {
+      const response = await fetch(`https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=${localConfig.teamId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -127,9 +146,9 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           background_color: localConfig.buttonBackground,
           button_text_color: localConfig.buttonTextColor,
           button_background_color: localConfig.buttonBackground,
-          scheduledDateTime: scheduledDateTime,
+          scheduledAt: scheduledDateTime,
           timezone: localConfig.timezone,
-          status: 'Scheduled', // Always set status to 'Scheduled'
+          status: 'Scheduled',
         }),
       });
 
@@ -149,9 +168,6 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
       onNotificationSent('Failed');
     }
   };
-
-
-
 
   return (
     <div className="bg-background text-foreground w-full p-4 rounded-lg border border-primary shadow-sm">
@@ -212,7 +228,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
             </div>
           )}
 
-          {(localConfig.modalType === 'Modal') && (
+          {localConfig.modalType === 'Modal' && (
             <div>
               <Label htmlFor="buttonText" className="text-foreground">Button Text</Label>
               <Input
@@ -249,13 +265,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
               <div className="relative flex-grow">
                 <DatePicker
                   selected={localConfig.scheduledDate ? new Date(localConfig.scheduledDate) : null}
-                  onChange={(date: Date | null) => {
-                    if (date) {
-                      updateConfig('scheduledDate', date);
-                    } else {
-                      updateConfig('scheduledDate', undefined);
-                    }
-                  }}
+                  onChange={(date: Date | null) => updateConfig('scheduledDate', date?.toISOString())}
                   dateFormat="MMMM d, yyyy"
                   className="w-full p-2 pl-10 border border-primary rounded focus:ring-primary text-foreground"
                   customInput={<Input />}
@@ -275,47 +285,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
             <p className="text-sm text-primary mt-1">{timeUntilSend}</p>
           </div>
 
-          <div>
-            <Label className="text-foreground flex items-center">
-              Expiration Date
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <InfoIcon className="ml-2 h-4 w-4 text-primary cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="z-50 bg-background p-2 rounded shadow">
-                    <p>The date when this notification will no longer be shown to users.</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </Label>
-            <Select
-              value={localConfig.expirationDate ? new Date(localConfig.expirationDate).getDate() - new Date().getDate() + '' : ''}
-              onValueChange={(value) => updateConfig('expirationDate', calculateExpirationDate(parseInt(value)))}
-            >
-              <SelectTrigger className="w-full border-primary focus:ring-primary">
-                <SelectValue placeholder="Select expiration" />
-              </SelectTrigger>
-              <SelectContent className='bg-background'>
-                {[1, 2, 3, 4, 5, 6, 7].map((days) => (
-                  <SelectItem key={days} value={days.toString()}>
-                    {days} {days === 1 ? 'day' : 'days'}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-sm text-primary mt-1">
-              Expiration: {localConfig.expirationDate
-                ? new Date(localConfig.expirationDate).toLocaleString(undefined, {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })
-                : 'Not set'}
-            </p>
-          </div>
+          <ExpirationDateSelect localConfig={localConfig} updateConfig={updateConfig} />
         </div>
         <DevicePreview config={localConfig} />
       </div>
@@ -324,7 +294,7 @@ export default function NotificationConfig({ config, onSave, teamId, onNotificat
           Save
         </Button>
         <Button onClick={sendNotification} className="bg-secondary hover:bg-secondary/90 text-secondary-foreground">
-          Send Notification
+          Schedule Notification
         </Button>
       </div>
       {notificationStatus && <p className="mt-4 text-sm text-primary">{notificationStatus}</p>}
