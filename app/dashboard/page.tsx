@@ -14,19 +14,14 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LayoutDashboard, MessageSquare, Newspaper, Bell, Users, UserCog } from 'lucide-react';
 
+
 export default function Dashboard() {
   const pages = [
     {
-      title: "Live Commentary",
-      description: "Real-time match updates and commentary",
-      icon: <MessageSquare className="h-6 w-6 text-primary" />,
-      link: "/dashboard/live-commentary",
-    },
-    {
-      title: "News Articles",
-      description: "Latest news and articles about the team",
-      icon: <Newspaper className="h-6 w-6 text-primary" />,
-      link: "/dashboard/news-articles",
+      title: "Team Roster",
+      description: "View and manage the team roster",
+      icon: <Users className="h-6 w-6 text-primary" />,
+      link: "/team-roster",
     },
     {
       title: "Notifications",
@@ -35,11 +30,20 @@ export default function Dashboard() {
       link: "/dashboard/notifications",
     },
     {
-      title: "Team Roster",
-      description: "View and manage the team roster",
-      icon: <Users className="h-6 w-6 text-primary" />,
-      link: "/team-roster",
+      title: "News Articles",
+      description: "Latest news and articles about the team",
+      icon: <Newspaper className="h-6 w-6 text-primary" />,
+      link: "/dashboard/news-articles",
     },
+    {
+      title: "Live Commentary",
+      description: "Real-time match updates and commentary",
+      icon: <MessageSquare className="h-6 w-6 text-primary" />,
+      link: "/dashboard/live-commentary",
+    },
+   
+   
+    
   ];
 
   return (

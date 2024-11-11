@@ -11,11 +11,13 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
+import { Badge } from "@/components/ui/badge";
 
 type SidebarProps = {
   className?: string;
 };
 
+// No need to transform the badges since they're already in the data
 export default function Sidebar({ className }: SidebarProps) {
   const { isMinimized, toggle } = useSidebar();
   const { theme, setTheme } = useTheme();
@@ -42,7 +44,6 @@ export default function Sidebar({ className }: SidebarProps) {
         setLogo('/logos/default-logo.png');
       }
     };
-
     loadLogo();
   }, [session]);
 

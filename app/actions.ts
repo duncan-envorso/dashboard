@@ -1,4 +1,6 @@
-import { BlogPost } from "@/types";
+import { currentTeamConfig } from "@/teamConfig";
+import { BlogPost, TeamData } from "@/types";
+import { notFound } from "next/navigation";
 
 export async function getPosts(): Promise<BlogPost[]> {
     return [
@@ -9,3 +11,38 @@ export async function getPosts(): Promise<BlogPost[]> {
     ]
   }
 
+
+  export async function fetchTeamData(): Promise<TeamData> {
+    if (!currentTeamConfig) {
+      console.error('Team configuration not found');
+      notFound();
+    }
+  
+    const teamId = currentTeamConfig.teamId;
+  
+    try {
+      const response = await fetch(
+        `https://api.seawolves.envorso.com/v1/teams/${teamId}/members`,
+        {
+          headers: {
+            'x-client-app-version': '2.0.17'
+          },
+          next: { revalidate: 3600 } // Revalidate every hour
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch team data');
+      }
+  
+      const data: TeamData = await response.json();
+      
+      // Optional: Log the fetched data (remove in production)
+      console.log('Fetched team data:', data);
+  
+      return data;
+    } catch (error) {
+      console.error('Error fetching team data:', error);
+      notFound(); // This will render the closest not-found page
+    }
+  }

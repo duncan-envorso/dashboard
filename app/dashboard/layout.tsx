@@ -6,7 +6,7 @@ import type { Metadata } from 'next';
 import { SessionProvider } from 'next-auth/react';
 
 export const metadata: Metadata = {
-  title: 'Chicago Hounds Dashboard',
+  title: 'Seattle Seawolves Dashboard',
   description: 'Official dashboard for Chicago Hounds Rugby'
 };
 

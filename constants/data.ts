@@ -1,93 +1,138 @@
 import { NavItem } from '@/types';
+import { Badge } from "@/components/ui/badge";
 
-export type User = {
+
+export interface User {
   id: number;
   name: string;
-  company: string;
   role: string;
+  department: string;
   verified: boolean;
-  status: string;
-};
+  status: 'Active' | 'Inactive';
+  accessLevel: 'Admin' | 'Editor' | 'Viewer';
+  lastActive?: string;
+}
+
 export const users: User[] = [
   {
     id: 1,
-    name: 'Candice Schiner',
-    company: 'Dell',
-    role: 'Frontend Developer',
-    verified: false,
-    status: 'Active'
+    name: 'Sarah Williams',
+    department: 'Media',
+    role: 'Head of Digital Content',
+    verified: true,
+    status: 'Active',
+    accessLevel: 'Admin',
+    lastActive: '2024-11-08'
   },
   {
     id: 2,
-    name: 'John Doe',
-    company: 'TechCorp',
-    role: 'Backend Developer',
+    name: 'James O\'Connor',
+    department: 'Coaching',
+    role: 'Performance Analyst',
     verified: true,
-    status: 'Active'
+    status: 'Active',
+    accessLevel: 'Editor',
+    lastActive: '2024-11-08'
   },
   {
     id: 3,
-    name: 'Alice Johnson',
-    company: 'WebTech',
-    role: 'UI Designer',
+    name: 'Emma Davies',
+    department: 'Media',
+    role: 'Social Media Manager',
     verified: true,
-    status: 'Active'
+    status: 'Active',
+    accessLevel: 'Editor',
+    lastActive: '2024-11-07'
   },
   {
     id: 4,
-    name: 'David Smith',
-    company: 'Innovate Inc.',
-    role: 'Fullstack Developer',
-    verified: false,
-    status: 'Inactive'
+    name: 'Tom Roberts',
+    department: 'Media',
+    role: 'Match Day Reporter',
+    verified: true,
+    status: 'Active',
+    accessLevel: 'Editor',
+    lastActive: '2024-11-08'
   },
   {
     id: 5,
-    name: 'Emma Wilson',
-    company: 'TechGuru',
-    role: 'Product Manager',
+    name: 'David Hughes',
+    department: 'Commercial',
+    role: 'Sponsorship Manager',
     verified: true,
-    status: 'Active'
+    status: 'Active',
+    accessLevel: 'Viewer',
+    lastActive: '2024-11-06'
   },
   {
     id: 6,
-    name: 'James Brown',
-    company: 'CodeGenius',
-    role: 'QA Engineer',
-    verified: false,
-    status: 'Active'
+    name: 'Lucy Chen',
+    department: 'Media',
+    role: 'Video Content Producer',
+    verified: true,
+    status: 'Active',
+    accessLevel: 'Editor',
+    lastActive: '2024-11-08'
   },
   {
     id: 7,
-    name: 'Laura White',
-    company: 'SoftWorks',
-    role: 'UX Designer',
+    name: 'Mike Thompson',
+    department: 'Medical',
+    role: 'Team Physio',
     verified: true,
-    status: 'Active'
+    status: 'Active',
+    accessLevel: 'Editor',
+    lastActive: '2024-11-07'
   },
   {
     id: 8,
-    name: 'Michael Lee',
-    company: 'DevCraft',
-    role: 'DevOps Engineer',
-    verified: false,
-    status: 'Active'
+    name: 'Rachel Anderson',
+    department: 'Operations',
+    role: 'Team Manager',
+    verified: true,
+    status: 'Active',
+    accessLevel: 'Admin',
+    lastActive: '2024-11-08'
   },
   {
     id: 9,
-    name: 'Olivia Green',
-    company: 'WebSolutions',
-    role: 'Frontend Developer',
+    name: 'Ian McMillan',
+    department: 'Coaching',
+    role: 'Stats Analyst',
     verified: true,
-    status: 'Active'
+    status: 'Active',
+    accessLevel: 'Editor',
+    lastActive: '2024-11-08'
   },
   {
     id: 10,
-    name: 'Robert Taylor',
-    company: 'DataTech',
-    role: 'Data Analyst',
-    verified: false,
-    status: 'Active'
+    name: 'Sophie Taylor',
+    department: 'Media',
+    role: 'Website Administrator',
+    verified: true,
+    status: 'Active',
+    accessLevel: 'Admin',
+    lastActive: '2024-11-08'
+  },
+  {
+    id: 11,
+    name: 'Ben Wilson',
+    department: 'Commercial',
+    role: 'Merchandise Manager',
+    verified: true,
+    status: 'Active',
+    accessLevel: 'Viewer',
+    lastActive: '2024-11-07'
+  },
+  {
+    id: 12,
+    name: 'Gareth Price',
+    department: 'Media',
+    role: 'Press Officer',
+    verified: true,
+    status: 'Active',
+    accessLevel: 'Editor',
+    lastActive: '2024-11-08'
   }
 ];
 
@@ -118,16 +163,10 @@ export const navItems: NavItem[] = [
     label: 'Dashboard'
   },
   {
-    title: 'Live Commentary',
-    href: '/dashboard/live-commentary',
-    icon: 'messageSquare',
-    label: 'Dashboard'
-  },
-  {
-    title: 'News Articles',
-    href: '/dashboard/news-articles',
-    icon: 'newspaper',
-    label: 'Newspaper'
+    title: 'Team Roster',
+    href: '/dashboard/team-roster',
+    icon: 'profile',
+    label: 'profile'
   },
   {
     title: 'Notifications',
@@ -136,16 +175,27 @@ export const navItems: NavItem[] = [
     label: 'notifications'
   },
   {
-    title: 'Team Roster',
-    href: '/dashboard/team-roster',
-    icon: 'profile',
-    label: 'profile'
+    title: 'News Articles',
+    href: '/dashboard/news-articles',
+    icon: 'newspaper',
+    label: 'Newspaper'
   },
+  {
+    title: 'Live Commentary',
+    href: '/dashboard/live-commentary',
+    icon: 'messageSquare',
+    label: 'Dashboard',
+    badge: 'Coming Soon'
+  },
+
+
   {
     title: 'User Management',
     href: '/dashboard/user-management',
-    icon: 'kanban',
-    label: 'kanban'
+    icon: 'settings',
+    label: 'settings',
+    // badge: 'Coming Soon' // Remove the JSX element and just use a string
+
   },
  
 ];

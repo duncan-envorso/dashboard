@@ -51,7 +51,8 @@ const authConfig: NextAuthConfig = {
             name: user.name,
             email: user.email,
             team: user.team,
-            teamId: user.teamId, // Include teamId here
+            teamId: user.teamId,
+            redirectUrl: '/dashboard', // Add this line to specify the redirect URL
           };
         }
         console.log('Authentication failed for:', credentials.email);
@@ -64,6 +65,7 @@ const authConfig: NextAuthConfig = {
       if (user) {
         token.team = user.team;
         token.teamId = user.teamId;
+        token.redirectUrl = (user as any).redirectUrl; // Add this line to include redirectUrl in the token
       }
       return token;
     },
@@ -71,12 +73,13 @@ const authConfig: NextAuthConfig = {
       if (session.user) {
         (session.user as any).team = token.team;
         (session.user as any).teamId = token.teamId;
+        (session.user as any).redirectUrl = token.redirectUrl; // Add this line to include redirectUrl in the session
       }
       return session;
     },
   },
   pages: {
-    signIn: '/signin',
+    signIn: '/',
     signOut: '/auth/signout',
     error: '/auth/error',
   },

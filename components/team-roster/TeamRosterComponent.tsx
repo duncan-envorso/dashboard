@@ -33,7 +33,7 @@ interface Coach {
 interface TeamData {
     players: Player[];
     coaches: Coach[];
-    staff: any[]; // Assuming staff is empty based on the provided data
+
 }
 
 interface TeamRosterDashboardProps {
@@ -41,35 +41,30 @@ interface TeamRosterDashboardProps {
 }
 
 const positionGroups = {
-    "1": "Forward",
-    "2": "Back",
-    "3": "Specialist",
-    "4": "Staff"
-}
+    'all': 'All Members',
+    'players': 'Players',
+    'coaches': 'Coaches',
+  
+};
 
 export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDashboardProps) {
     const [editingMember, setEditingMember] = useState<Player | Coach | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [activeTab, setActiveTab] = useState('all')
 
-
-
-
     const filteredMembers = useMemo(() => {
-        const players = apiFormattedData?.players || []
-        const coaches = apiFormattedData?.coaches || []
-        const allMembers = [...players, ...coaches]
+        const { players = [], coaches = [] } = apiFormattedData;
 
-        if (activeTab === 'all') {
-            return allMembers
-        } else if (activeTab === 'coaches') {
-            return coaches
-        } else {
-            return players.filter(player =>
-                player.position_group_id === parseInt(activeTab)
-            )
+        switch (activeTab) {
+            case 'all':
+                return [...players, ...coaches];
+            case 'players':
+                return players;
+            case 'coaches':
+                return coaches;
+            // Removed unreachable return statement
         }
-    }, [apiFormattedData, activeTab])
+    }, [apiFormattedData, activeTab]);
 
     const handleEdit = (member: Player | Coach) => {
         setEditingMember(member)
@@ -93,6 +88,43 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
         console.log('Add new member')
     }
 
+    const renderCard = (member: Player | Coach) => (
+        <Card key={member.id} className="overflow-hidden bg-card shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <div className="relative min-h-96">
+                <Image
+                    src={member.portrait || '/placeholder-image.jpg'}
+                    alt={`Portrait of ${member.name}`}
+                  fill
+                    objectFit="cover"
+                    className="transition-transform duration-300 hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                    <CardTitle className="text-2xl font-bold mb-1">{member.name}</CardTitle>
+                    <Badge variant="secondary" className="text-sm mb-2">
+                        {'position' in member ? member.position : member.job_title}
+                    </Badge>
+                    {'height' in member && 'weight' in member && (
+                        <div className="flex justify-between items-center text-sm">
+                            <div>
+                                <p className="text-gray-300">Height / Weight</p>
+                                <p className="font-semibold">{member.height}cm / {member.weight}kg</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+            <CardContent className="p-4">
+                <Button
+                    className="w-full bg-primary text-primary-foreground"
+                    onClick={() => handleEdit(member)}
+                >
+                    Edit Member
+                </Button>
+            </CardContent>
+        </Card>
+    );
+
     return (
         <div className="bg-slate-100 min-h-screen">
             <div className="container mx-auto p-4">
@@ -103,63 +135,21 @@ export default function TeamRosterDashboard({ apiFormattedData }: TeamRosterDash
                     </Button>
                 </div>
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="bg-slate-100">
-                        <TabsTrigger
-                            value="all"
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                            All Members
-                        </TabsTrigger>
+                    <TabsList className="bg-slate-100 mb-4 flex space-x-2">
                         {Object.entries(positionGroups).map(([id, name]) => (
                             <TabsTrigger
                                 key={id}
                                 value={id}
-                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+                                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground px-4 py-2 rounded-md"
                             >
                                 {name}
                             </TabsTrigger>
                         ))}
-                        <TabsTrigger
-                            value="coaches"
-                            className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-                        >
-                            Coaches
-                        </TabsTrigger>
                     </TabsList>
-                    <TabsContent value={activeTab}>
+                    <TabsContent value={activeTab} className="mt-4">
                         <ScrollArea className="h-[calc(100vh-200px)]">
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6 pb-6">
-                                {filteredMembers.map((member) => (
-                                    <Card key={member.id} className="overflow-hidden bg-card shadow-lg hover:shadow-xl transition-shadow duration-300">
-                                        <div className="relative">
-                                            <Image
-                                                src={member.portrait || '/placeholder-image.jpg'}
-                                                alt={`Portrait of ${member.name}`}
-                                                width={300}
-                                                height={400}
-                                                className="w-full h-auto object-cover"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent"></div>
-                                            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                                                <CardTitle className="text-2xl font-bold mb-1">{member.name}</CardTitle>
-                                                <Badge variant="secondary" className="text-sm mb-2">
-                                                    {'position' in member ? member.position : member.job_title}
-                                                </Badge>
-                                                {'height' in member && 'weight' in member && (
-                                                    <div className="flex justify-between items-center text-sm">
-                                                        <div>
-                                                            <p className="text-gray-300">Height / Weight</p>
-                                                            <p className="font-semibold">{member.height}cm / {member.weight}kg</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                        <CardContent className="p-4">
-                                            <Button className="w-full bg-primary text-primary-foreground" onClick={() => handleEdit(member)}>Edit Member</Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
+                                {filteredMembers?.map(renderCard)}
                             </div>
                         </ScrollArea>
                     </TabsContent>

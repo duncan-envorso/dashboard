@@ -8,6 +8,7 @@ export interface NavItem {
   icon?: keyof typeof Icons;
   label?: string;
   description?: string;
+  badge?: string;
 }
 
 export interface NavItemWithChildren extends NavItem {
@@ -109,4 +110,28 @@ export interface NewsPost {
   type: string;
   image: string;
   date_formatted: string;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  position: string;
+  position_group_id: number | null;
+  height: number;
+  weight: number;
+  portrait: string;
+  thumbnail: string;
+}
+
+export interface Coach {
+  id: number;
+  name: string;
+  job_title: string;
+  portrait: string;
+}
+
+export interface TeamData {
+  players: Player[];
+  coaches: Coach[];
+  staff: any[]; // Define a more specific type if staff data structure becomes available
 }
