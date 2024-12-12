@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
@@ -18,18 +18,22 @@ export const useTheme = () => {
   return theme;
 };
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children
+}) => {
   const { data: session } = useSession();
   const [theme, setTheme] = useState<Theme | null>(null);
 
   useEffect(() => {
     const loadTheme = async () => {
       if (session?.user?.team) {
-        console.log(session.user.team);
+        console.log('this is', session.user.team);
         try {
           // Dynamically import the CSS module with the correct path
-          const teamModule = await import(`@/app/styles/teams/${session.user.team}.module.css`);
-          
+          const teamModule = await import(
+            `@/app/styles/teams/${session.user.team}.module.css`
+          );
+
           // Apply the styles to the document root
           document.documentElement.classList.add(teamModule.default.root);
 
@@ -57,9 +61,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }
 
   return (
-    <ThemeContext.Provider value={theme}>
-      {children}
-    </ThemeContext.Provider>
+    <ThemeContext.Provider value={theme}>{children}</ThemeContext.Provider>
   );
 };
 

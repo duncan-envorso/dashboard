@@ -19,12 +19,18 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   email: z.string().email({ message: 'Enter a valid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' })
+  password: z
+    .string()
+    .min(6, { message: 'Password must be at least 6 characters' })
 });
 
 type UserFormValue = z.infer<typeof formSchema>;
 
-export default function UserAuthForm({ isSignUp = false }: { isSignUp?: boolean }) {
+export default function UserAuthForm({
+  isSignUp = false
+}: {
+  isSignUp?: boolean;
+}) {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
   const [loading, setLoading] = useState(false);
@@ -32,8 +38,8 @@ export default function UserAuthForm({ isSignUp = false }: { isSignUp?: boolean 
 
   // Pre-populated credentials
   const defaultValues = {
-    email: 'jane@seawolves.com',
-    password: 'password456'
+    email: 'olivia@soarmedia.agency',
+    password: 'seawolvesmarketingadmin123'
   };
 
   const form = useForm<UserFormValue>({
@@ -67,10 +73,7 @@ export default function UserAuthForm({ isSignUp = false }: { isSignUp?: boolean 
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="w-full space-y-4"
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -107,12 +110,15 @@ export default function UserAuthForm({ isSignUp = false }: { isSignUp?: boolean 
             </FormItem>
           )}
         />
-        {error && <div className="text-red-500 text-sm">{error}</div>}
+        {error && <div className="text-sm text-red-500">{error}</div>}
         <Button disabled={loading} className="ml-auto w-full" type="submit">
-          {loading ? 
-            (isSignUp ? 'Signing Up...' : 'Signing In...') : 
-            (isSignUp ? 'Sign Up' : 'Sign In')
-          }
+          {loading
+            ? isSignUp
+              ? 'Signing Up...'
+              : 'Signing In...'
+            : isSignUp
+            ? 'Sign Up'
+            : 'Sign In'}
         </Button>
       </form>
     </Form>

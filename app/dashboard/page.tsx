@@ -12,38 +12,41 @@ import {
   CardFooter
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { LayoutDashboard, MessageSquare, Newspaper, Bell, Users, UserCog } from 'lucide-react';
-
+import {
+  LayoutDashboard,
+  MessageSquare,
+  Newspaper,
+  Bell,
+  Users,
+  UserCog
+} from 'lucide-react';
 
 export default function Dashboard() {
   const pages = [
     {
-      title: "Team Roster",
-      description: "View and manage the team roster",
+      title: 'Team Roster',
+      description: 'View and manage the team roster',
       icon: <Users className="h-6 w-6 text-primary" />,
-      link: "/team-roster",
+      link: '/dashboard/team-roster'
     },
     {
-      title: "Notifications",
-      description: "Manage and send notifications to users",
+      title: 'Notifications',
+      description: 'Manage and send notifications to users',
       icon: <Bell className="h-6 w-6 text-primary" />,
-      link: "/dashboard/notifications",
+      link: '/dashboard/notifications'
     },
     {
-      title: "News Articles",
-      description: "Latest news and articles about the team",
+      title: 'News Articles',
+      description: 'Latest news and articles about the team',
       icon: <Newspaper className="h-6 w-6 text-primary" />,
-      link: "/dashboard/news-articles",
+      link: '/dashboard/news-articles'
     },
     {
-      title: "Live Commentary",
-      description: "Real-time match updates and commentary",
+      title: 'Live Commentary',
+      description: 'Real-time match updates and commentary',
       icon: <MessageSquare className="h-6 w-6 text-primary" />,
-      link: "/dashboard/live-commentary",
-    },
-   
-   
-    
+      link: '/dashboard/live-commentary'
+    }
   ];
 
   return (
@@ -56,8 +59,8 @@ export default function Dashboard() {
         </div>
         <Tabs defaultValue="overview" className="space-y-4">
           <TabsList className="bg-secondary">
-            <TabsTrigger 
-              value="overview" 
+            <TabsTrigger
+              value="overview"
               className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
             >
               Overview
@@ -69,11 +72,16 @@ export default function Dashboard() {
           <TabsContent value="overview" className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {pages.map((page) => (
-                <Card key={page.title} className="flex flex-col border-l-4 border-l-primary bg-white">
+                <Card
+                  key={page.title}
+                  className="flex flex-col border-l-4 border-l-primary bg-white"
+                >
                   <CardHeader>
                     <div className="flex items-center space-x-2">
                       {page.icon}
-                      <CardTitle className="text-primary">{page.title}</CardTitle>
+                      <CardTitle className="text-primary">
+                        {page.title}
+                      </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="flex-grow">
@@ -81,7 +89,7 @@ export default function Dashboard() {
                   </CardContent>
                   <CardFooter>
                     <Link href={page.link} passHref>
-                      <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground">
+                      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
                         View
                       </Button>
                     </Link>

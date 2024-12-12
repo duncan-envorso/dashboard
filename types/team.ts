@@ -1,57 +1,43 @@
-export interface Player {
-    id: string;
-    name: string;
-    position: string;
-    position_group_id: number | null;
-    height: number;
-    weight: number;
-    portrait: string;
-    thumbnail: string;
-}
+// types/team.ts
 
-export interface Coach {
-    id: number;
-    name: string;
-    job_title: string;
-    portrait: string;
-}
-
-export interface TeamData {
-    players: Player[];
-    coaches: Coach[];
-    staff: any[]; // Assuming staff is empty based on the provided data
-}
-
-export const positionGroups = {
-    "1": "Forward",
-    "2": "Back",
-    "3": "Specialist",
-    "4": "Staff"
-}
-
-type Team = {
+/**
+ * Represents a staff member's data
+ */
+export interface StaffMember {
+  team_id: string;
   name: string;
-  shortName: string;
-  wins: number;
-  losses: number;
-  draws: number;
-  image_path: string;
-};
+  job_title: string;
+  bio: string;
+  portrait: string;
+  is_coach: boolean;
+}
 
-type Match = {
-  venue: string;
-  start_time: string; // Date as string in ISO format
-  round: number;
+/**
+ * Represents a team roster member's data
+ */
+export interface RosterMember {
+  team_id: string;
   name: string;
-  match_id: string;
-  match_type: string;
-  home_score: number;
-  away_score: number;
-  homeTeam: Team;
-  awayTeam: Team;
-};
+  position: string;
+  height: number; // in centimeters
+  weight: number; // in kilograms
+  hometown: string;
+  date_of_birth: string; // ISO 8601 format (YYYY-MM-DD)
+  bio: string;
+  portrait: string;
+  is_active: boolean;
+}
 
-type MatchesData = {
-  upcomingMatchesData: Match[];
-  pastMatchesData: Match[];
-};
+/**
+ * Array types for multiple members
+ */
+export type StaffData = StaffMember[];
+export type RosterData = RosterMember[];
+
+/**
+ * Combined team data type
+ */
+export interface CombinedTeamData {
+  roster: RosterData;
+  staff: StaffData;
+}

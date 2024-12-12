@@ -1,89 +1,100 @@
-import { NextAuthConfig } from 'next-auth';
+import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
+import { jwtDecode } from 'jwt-decode';
 
-// Mock user database with passwords (in a real app, passwords would be hashed)
-const users = {
-  'john@chicago.com': { 
-    id: '1', 
-    name: 'John Doe', 
-    email: 'john@chicago.com', 
-    team: 'chicago-hounds',
-    teamId: '17a788b5-2ac6-41d6-a320-f4d75cdd08b9',
-    password: 'password123' // In a real app, this would be a hashed password
-  },
-  'jane@seawolves.com': { 
-    id: '2', 
-    name: 'Jane Smith', 
-    email: 'jane@seawolves.com', 
-    team: 'seattle-seawolves',
-    teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
-    password: 'password456' // In a real app, this would be a hashed password
-  },
-};
-
-async function getUserFromDatabase(email: string) {
-  return users[email as keyof typeof users] || null;
-}
-
-const authConfig: NextAuthConfig = {
+const authConfig: NextAuthOptions = {
   providers: [
     GithubProvider({
-      clientId: process.env.GITHUB_ID ?? '',
-      clientSecret: process.env.GITHUB_SECRET ?? '',
+      clientId: process.env.GITHUB_ID || '',
+      clientSecret: process.env.GITHUB_SECRET || ''
     }),
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: 'email' },
-        password: { label: "Password", type: 'password' },
+        email: {
+          label: 'Email',
+          type: 'email',
+          placeholder: 'example@example.com'
+        },
+        password: { label: 'Password', type: 'password' }
       },
-      async authorize(credentials, req) {
-        if (typeof credentials?.email !== 'string' || typeof credentials?.password !== 'string') {
-          console.log('Missing email or password');
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          console.error('Missing email or password');
           return null;
         }
-        const user = await getUserFromDatabase(credentials.email);
-        if (user && user.password === credentials.password) { // In a real app, use a proper password comparison
-          console.log('User authenticated:', user.email);
+
+        try {
+          const response = await fetch(
+            'https://api.seawolves.envorso.com/v1/login',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: credentials.email,
+                password: credentials.password
+              })
+            }
+          );
+
+          if (!response.ok) {
+            console.error('Failed to authenticate user');
+            return null;
+          }
+
+          const { token } = await response.json();
+          const decodedToken = jwtDecode<{ id: string; teamId: string }>(token);
+
+          // Return the user object with token information
           return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            team: user.team,
-            teamId: user.teamId,
-            redirectUrl: '/dashboard', // Add this line to specify the redirect URL
+            id: decodedToken.id,
+            email: credentials.email,
+            teamId: decodedToken.teamId,
+            team: 'seattle-seawolves', // Add a placeholder team name
+            token
           };
+        } catch (error) {
+          console.error('Error during authentication:', error);
+          return null;
         }
-        console.log('Authentication failed for:', credentials.email);
-        return null;
-      },
-    }),
+      }
+    })
   ],
   callbacks: {
-    jwt: async ({ token, user }) => {
+    async jwt({ token, user }: any) {
       if (user) {
-        token.team = user.team;
+        // Store user details and accessToken in the JWT
+        token.id = user.id;
+        token.email = user.email;
         token.teamId = user.teamId;
-        token.redirectUrl = (user as any).redirectUrl; // Add this line to include redirectUrl in the token
+        token.team = user.team;
+        token.accessToken = user.token; // Store accessToken in JWT token
       }
-      return token;
+      return token; // Pass token forward
     },
-    session: async ({ session, token }) => {
-      if (session.user) {
-        (session.user as any).team = token.team;
-        (session.user as any).teamId = token.teamId;
-        (session.user as any).redirectUrl = token.redirectUrl; // Add this line to include redirectUrl in the session
+    async session({ session, token }: any) {
+      if (token) {
+        // Store user details and accessToken in the session
+        session.user = {
+          ...session.user,
+          id: token.id,
+          email: token.email,
+          teamId: token.teamId,
+          team: token.team,
+          token: token.accessToken
+        };
+        session.accessToken = token.accessToken; // Store accessToken in session
       }
-      return session;
-    },
+      return session; // Return updated session with the accessToken
+    }
   },
   pages: {
     signIn: '/',
     signOut: '/auth/signout',
-    error: '/auth/error',
+    error: '/auth/error'
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: process.env.NODE_ENV === 'development'
 };
 
 export default authConfig;

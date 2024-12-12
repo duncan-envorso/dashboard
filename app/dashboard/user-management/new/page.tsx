@@ -1,6 +1,6 @@
 // app/dashboard/users/new/page.tsx
 import { Breadcrumbs } from '@/components/breadcrumbs';
-import { UserForm } from '@/components/forms/product-form';
+import { UserForm } from '@/components/forms/user-form';
 import PageContainer from '@/components/layout/page-container';
 
 const breadcrumbItems = [
@@ -9,7 +9,7 @@ const breadcrumbItems = [
   { title: 'New User', link: '#' }
 ];
 
-export default function Page() {
+export default function NewUserForm() {
   return (
     <PageContainer>
       <div className="space-y-4">

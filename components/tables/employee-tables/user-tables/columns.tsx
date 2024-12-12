@@ -1,10 +1,10 @@
 'use client';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Employee } from '@/constants/data';
 import { ColumnDef } from '@tanstack/react-table';
 import { CellAction } from './cell-action';
+import { Checkbox } from '@/components/ui/checkbox';
+import { User } from '@/types/user';
 
-export const columns: ColumnDef<Employee>[] = [
+export const columns: ColumnDef<User>[] = [
   {
     id: 'select',
     header: ({ table }) => (
@@ -24,26 +24,23 @@ export const columns: ColumnDef<Employee>[] = [
     enableSorting: false,
     enableHiding: false
   },
-  {
-    accessorKey: 'first_name',
-    header: 'NAME'
-  },
-  {
-    accessorKey: 'country',
-    header: 'COUNTRY'
-  },
+
   {
     accessorKey: 'email',
-    header: 'EMAIL'
+    header: 'Email'
   },
   {
-    accessorKey: 'job',
-    header: 'COMPANY'
+    accessorKey: 'permissions',
+    header: 'Permissions',
+    cell: ({ row }) => {
+      const permissions: string[] = row.getValue('permissions') || []; // Ensure it is an array
+
+      return permissions.length > 0
+        ? permissions.join(', ')
+        : 'No permissions assigned';
+    }
   },
-  {
-    accessorKey: 'gender',
-    header: 'GENDER'
-  },
+
   {
     id: 'actions',
     cell: ({ row }) => <CellAction data={row.original} />

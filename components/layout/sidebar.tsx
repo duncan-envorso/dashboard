@@ -11,7 +11,8 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
-import { Badge } from "@/components/ui/badge";
+import { Badge } from '@/components/ui/badge';
+import AuthRedirectButton from '../AuthRedirectButton';
 
 type SidebarProps = {
   className?: string;
@@ -78,7 +79,7 @@ export default function Sidebar({ className }: SidebarProps) {
         variant="ghost"
         size="icon"
         className={cn(
-          'absolute -right-3 top-20 z-50 rounded-full border bg-secondary text-secondary-foreground hover:bg-accent transition-colors',
+          'absolute -right-3 top-20 z-50 rounded-full border bg-secondary text-secondary-foreground transition-colors hover:bg-accent',
           isMinimized && 'rotate-180'
         )}
         onClick={handleToggle}
@@ -94,16 +95,8 @@ export default function Sidebar({ className }: SidebarProps) {
           </div>
         </div>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute bottom-5 left-5 text-primary-foreground hover:bg-secondary hover:text-secondary-foreground dark:hover:bg-accent dark:hover:text-accent-foreground"
-        onClick={toggleTheme}
-      >
-        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-        <span className="sr-only">Toggle theme</span>
-      </Button>
+
+      <AuthRedirectButton />
     </aside>
   );
 }

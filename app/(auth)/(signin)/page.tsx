@@ -1,11 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+
 import AuthTabs from '@/components/authTabs';
 import Image from 'next/image';
 
@@ -27,12 +25,10 @@ export default function AuthenticationPage() {
 
   return (
     <div className="relative h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
-
-
       {/* Logo Column */}
-      <div className="relative hidden h-full flex-col bg-muted text-white dark:border-r lg:flex">
+      <div className="relative hidden h-full flex-col bg-muted text-white lg:flex dark:border-r">
         <div className="absolute inset-0 bg-zinc-900" />
-        
+
         {/* Centered Logo Container */}
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
@@ -41,7 +37,7 @@ export default function AuthenticationPage() {
               alt="Envorso Logo"
               width={250}
               height={90}
-              className="dark:filter dark:invert"
+              className="dark:invert dark:filter"
             />
             <span className="text-sm text-zinc-400">Powered by Envorso</span>
           </div>

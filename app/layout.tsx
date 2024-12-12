@@ -1,41 +1,39 @@
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import './globals.css'
-import '../app/utils/themeInitializer'
-import { SessionProvider } from 'next-auth/react'
-import HeapAnalytics from '@/hooks/heapAnalytics'
-import { ThemeProvider } from '@/components/ThemeProvider'
+// layout.tsx
 import Providers from '@/components/layout/providers';
-import { auth } from '@/auth';
-import { Toaster } from '@/components/ui/toaster'
-import Header from '@/components/layout/header'
-import Sidebar from '@/components/layout/sidebar'
+import { Toaster } from '@/components/ui/toaster';
+import './globals.css';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { getServerSession } from 'next-auth';
+import authConfig from '@/auth.config';
+import ThemeProvider from '@/components/ThemeProvider';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Rugby Team Landing Page',
-  description: 'Welcome to our rugby team\'s official website',
-}
+  title: 'Next Shadcn',
+  description: 'Basic dashboard with Next.js and Shadcn'
+};
 
 export default async function RootLayout({
-  children,
+  children
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
+  const session = await getServerSession(authConfig);
+  console.log('session', session);
 
   return (
-    <html lang="en">
-      <body className={`${inter.className} bg-slate-100 text-foreground`}>
-    <SessionProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
+        <Providers session={session}>
           <ThemeProvider>
-            <HeapAnalytics />
-            <Toaster   />
             {children}
+
+            <Toaster />
           </ThemeProvider>
-     </SessionProvider>
-        {/* <Footer /> */}
+        </Providers>
       </body>
     </html>
-  )
+  );
 }
