@@ -11,8 +11,12 @@ const AuthRedirectButton = () => {
       ? `?token=${session.accessToken}`
       : '';
 
+    // Get the frontend URL from environment variables, falling back to a default if not set
+    const frontendUrl =
+      process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001';
+
     // Redirect to the authentication page of the other application
-    window.location.href = `http://localhost:3001/api/auth/signin${authParam}`;
+    window.location.href = `${frontendUrl}/api/auth/signin${authParam}`;
   };
 
   return (
