@@ -1,11 +1,17 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import BlogEditor from '@/components/blog/Tiptap'
+import { useState } from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import BlogEditor from '@/components/blog/Tiptap';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,41 +20,54 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { useSession } from 'next-auth/react';
 
 export default function NewPostPage() {
-  const router = useRouter()
-  const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const router = useRouter();
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const session = useSession();
+  const teamId = session.data?.user.teamId;
+  const token = session.data?.user.token;
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const handleGoBack = () => {
-    setIsAlertOpen(true)
-  }
+    setIsAlertOpen(true);
+  };
 
   const handleConfirmGoBack = () => {
-    setIsAlertOpen(false)
-    router.back()
-  }
+    setIsAlertOpen(false);
+    router.back();
+  };
 
   return (
     <div className="">
-     
-        <BlogEditor goBack={handleGoBack} />
+      <BlogEditor
+        goBack={handleGoBack}
+        teamId={teamId || ' '}
+        token={token ?? ''}
+        onDraftChange={(hasDraft) => setHasUnsavedChanges(hasDraft)}
+      />
 
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to go back?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Are you sure you want to go back?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               Any unsaved changes will be lost. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmGoBack}>Yes, go back</AlertDialogAction>
+            <AlertDialogAction onClick={handleConfirmGoBack}>
+              Yes, go back
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

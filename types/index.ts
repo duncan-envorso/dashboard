@@ -86,26 +86,6 @@ export type Notification = {
 
 export type Notifications = Notification[];
 
-export interface BlogPost {
-  featuredImage?: string;
-  excerpt?: string;
-  slug?: string;
-  content?: string;
-  id: number;
-  title: string;
-  author: string;
-  status: 'published' | 'draft' | 'archived';
-  createdAt: string;
-}
-
-export interface NewsPost {
-  id: number;
-  title: string;
-  type: string;
-  image: string;
-  date_formatted: string;
-}
-
 export interface Coach {
   id: number;
   name: string;

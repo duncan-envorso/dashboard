@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -8,23 +8,41 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
   SortingState,
-  useReactTable,
-} from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useNotifications } from '@/app/contexts/NotifcationsContext'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from "@/components/ui/button"
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Notification } from '@/types'
+  useReactTable
+} from '@tanstack/react-table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import { useNotifications } from '@/app/contexts/NotifcationsContext';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+import { Notification } from '@/types';
 
 const columns: ColumnDef<Notification>[] = [
   {
     accessorKey: 'title',
-    header: 'Title',
+    header: 'Title'
   },
   {
     accessorKey: 'modal_type',
-    header: 'Type',
+    header: 'Type'
   },
   {
     accessorKey: 'created_at',
@@ -33,42 +51,44 @@ const columns: ColumnDef<Notification>[] = [
       <span suppressHydrationWarning>
         {new Date(row.original.created_at).toLocaleString()}
       </span>
-    ),
+    )
   },
   {
     accessorKey: 'expires_at',
     header: 'Expires at',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
-        {row.original.expires_at ? new Date(row.original.expires_at).toLocaleString() : 'N/A'}
+        {row.original.expires_at
+          ? new Date(row.original.expires_at).toLocaleString()
+          : 'N/A'}
       </span>
-    ),
+    )
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: 'Status'
   },
   {
     accessorKey: 'viewed_count',
-    header: 'Viewed',
+    header: 'Viewed'
   },
   {
     accessorKey: 'clicked_count',
-    header: 'Clicked',
+    header: 'Clicked'
   },
   {
     accessorKey: 'dismissed_count',
-    header: 'Dismissed',
-  },
-]
+    header: 'Dismissed'
+  }
+];
 
 export default function NotificationsCard() {
-  const { notifications, loading, error } = useNotifications()
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const { notifications, loading, error } = useNotifications();
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
-  })
+    pageSize: 10
+  });
 
   const table = useReactTable({
     data: notifications,
@@ -80,39 +100,44 @@ export default function NotificationsCard() {
     onPaginationChange: setPagination,
     state: {
       sorting,
-      pagination,
-    },
-  })
-
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+      pagination
+    }
+  });
 
   return (
-    <Card className="m-5 shadow-sm bg-white overflow-hidden">
-      <CardHeader className="bg-primary/30 backdrop:blur-xl text-secondary">
-        <CardTitle className="text-2xl font-industry font-bold">Notifications</CardTitle>
-        <CardDescription className="text-primary">View all in-app notifications</CardDescription>
+    <Card className="m-5 overflow-hidden bg-white shadow-sm">
+      <CardHeader className="bg-primary/30 text-secondary backdrop:blur-xl">
+        <CardTitle className="font-industry text-2xl font-bold">
+          Modals
+        </CardTitle>
+        <CardDescription className="text-primary">
+          View all in-app Modals
+        </CardDescription>
       </CardHeader>
       <CardContent className="mt-4 overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="mt-2 p-2 rounded">
+              <TableRow key={headerGroup.id} className="mt-2 rounded p-2">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
-                      className="text-primary rounded cursor-pointer"
+                      className="cursor-pointer rounded text-primary"
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getIsSorted() && (
-                        header.column.getIsSorted() === 'asc' 
-                          ? <ChevronUp className="inline ml-1" /> 
-                          : <ChevronDown className="inline ml-1" />
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
                       )}
+                      {header.column.getIsSorted() &&
+                        (header.column.getIsSorted() === 'asc' ? (
+                          <ChevronUp className="ml-1 inline" />
+                        ) : (
+                          <ChevronDown className="ml-1 inline" />
+                        ))}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -122,19 +147,25 @@ export default function NotificationsCard() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-secondary/10 rounded dark:hover:bg-secondary/20"
+                  data-state={row.getIsSelected() && 'selected'}
+                  className="rounded hover:bg-secondary/10 dark:hover:bg-secondary/20"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No results.
                 </TableCell>
               </TableRow>
@@ -153,7 +184,7 @@ export default function NotificationsCard() {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
             <Button
@@ -163,11 +194,11 @@ export default function NotificationsCard() {
               disabled={!table.getCanNextPage()}
             >
               Next
-              <ChevronRight className="h-4 w-4 ml-2" />
+              <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

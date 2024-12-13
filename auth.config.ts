@@ -55,7 +55,7 @@ const authConfig: NextAuthOptions = {
             token
           };
         } catch (error) {
-          console.error('Error during authentication:', error);
+          console.log('Error during authentication:', error);
           return null;
         }
       }

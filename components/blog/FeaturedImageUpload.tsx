@@ -1,37 +1,52 @@
-// FeaturedImageUpload.tsx
-import React from 'react'
-import { Input } from "@/components/ui/input"
-import { Image } from '@radix-ui/react-avatar'
+import React from 'react';
+import { Input } from '@/components/ui/input';
+import Image from 'next/image';
 
-const FeaturedImageUpload = ({ featuredImage, setFeaturedImage }: { featuredImage: string, setFeaturedImage: (image: string) => void }) => {
-  const handleFeaturedImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setFeaturedImage(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
+interface FeaturedImageUploadProps {
+  featuredImage: string;
+  setFeaturedImage: (image: string) => void;
+}
+
+const FeaturedImageUpload: React.FC<FeaturedImageUploadProps> = ({
+  featuredImage,
+  setFeaturedImage
+}) => {
+  const handleImageUrlChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFeaturedImage(event.target.value);
+  };
 
   return (
     <div>
-      <label htmlFor="featuredImage" className="block text-sm font-medium mb-1">Featured Image</label>
-      <div className="flex items-center space-x-2">
+      <label htmlFor="featuredImage" className="mb-1 block text-sm font-medium">
+        Featured Image URL
+      </label>
+      <div className="space-y-2">
         <Input
           id="featuredImage"
-          type="file"
-          accept="image/*"
-          onChange={handleFeaturedImageUpload}
+          type="url"
+          value={featuredImage}
+          onChange={handleImageUrlChange}
+          placeholder="Enter image URL (e.g., https://example.com/image.jpg)"
           className="border-primary focus:ring-primary"
         />
+
         {featuredImage && (
-          <Image src={featuredImage} alt="Featured" className="h-20 w-20 object-cover rounded" />
+          <div className="relative h-40 w-40">
+            <Image
+              src={featuredImage}
+              alt="Featured"
+              fill
+              className="rounded object-cover"
+              onError={() => {
+                setFeaturedImage('');
+                alert('Invalid image URL. Please check the URL and try again.');
+              }}
+            />
+          </div>
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default FeaturedImageUpload
+export default FeaturedImageUpload;

@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import React from 'react'
+import React from 'react';
 import {
   ColumnDef,
   flexRender,
@@ -8,24 +8,42 @@ import {
   getSortedRowModel,
   getPaginationRowModel,
   SortingState,
-  useReactTable,
-} from '@tanstack/react-table'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useNotifications } from '@/app/contexts/NotifcationsContext'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from "@/components/ui/button"
-import { ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
-import { Notification } from '@/types'
+  useReactTable
+} from '@tanstack/react-table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import { useNotifications } from '@/app/contexts/NotifcationsContext';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+import { Notification } from '@/types';
 
 const columns: ColumnDef<Notification>[] = [
   {
     accessorKey: 'title',
     header: 'Title',
-    cell: ({ row }) => row.getValue('title') || 'N/A',
+    cell: ({ row }) => row.getValue('title') || 'N/A'
   },
   {
     accessorKey: 'modal_type',
-    header: 'Type',
+    header: 'Type'
   },
   {
     accessorKey: 'created_at',
@@ -34,46 +52,49 @@ const columns: ColumnDef<Notification>[] = [
       <span suppressHydrationWarning>
         {new Date(row.getValue('created_at')).toLocaleString()}
       </span>
-    ),
+    )
   },
   {
     accessorKey: 'expires_at',
     header: 'Expires at',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
-        {row.getValue('expires_at') ? new Date(row.getValue('expires_at')).toLocaleString() : 'N/A'}
+        {row.getValue('expires_at')
+          ? new Date(row.getValue('expires_at')).toLocaleString()
+          : 'N/A'}
       </span>
-    ),
+    )
   },
   {
     accessorKey: 'viewed_count',
     header: 'Viewed',
-    cell: ({ row }) => row.getValue('viewed_count') || 'NA',
+    cell: ({ row }) => row.getValue('viewed_count') || 'NA'
   },
   {
     accessorKey: 'clicked_count',
     header: 'Clicked',
-    cell: ({ row }) => row.getValue('clicked_count') || 'NA',
+    cell: ({ row }) => row.getValue('clicked_count') || 'NA'
   },
   {
     accessorKey: 'dismissed_count',
     header: 'Dismissed',
-    cell: ({ row }) => row.getValue('dismissed_count') || 'NA',
-  },
-]
+    cell: ({ row }) => row.getValue('dismissed_count') || 'NA'
+  }
+];
 
 export default function ActiveNotifications() {
-  const { notifications, loading, error } = useNotifications()
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const { notifications, loading, error } = useNotifications();
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
-  })
+    pageSize: 10
+  });
 
-  const activeNotifications = React.useMemo(() =>
-    notifications.filter(notification => notification.status === "Active"),
+  const activeNotifications = React.useMemo(
+    () =>
+      notifications.filter((notification) => notification.status === 'Active'),
     [notifications]
-  )
+  );
 
   const table = useReactTable({
     data: activeNotifications,
@@ -85,39 +106,50 @@ export default function ActiveNotifications() {
     onPaginationChange: setPagination,
     state: {
       sorting,
-      pagination,
-    },
-  })
+      pagination
+    }
+  });
 
-  if (loading) return <div>Loading...</div>
-  if (error) return <div>Error: {error}</div>
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
-    <Card className="m-5 shadow-sm bg-white overflow-hidden">
-      <CardHeader className="bg-primary/30 backdrop:blur-xl text-secondary">
-        <CardTitle className="text-2xl font-industry font-bold">Active Notifications</CardTitle>
-        <CardDescription className="text-primary">View all active in-app notifications</CardDescription>
+    <Card className="m-5 overflow-hidden bg-white shadow-sm">
+      <CardHeader className="bg-primary/30 text-secondary backdrop:blur-xl">
+        <CardTitle className="font-industry text-2xl font-bold">
+          Active Modals
+        </CardTitle>
+        <CardDescription className="text-primary">
+          View all active in-app modals
+        </CardDescription>
       </CardHeader>
       <CardContent className="mt-4 overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="mt-2 p-2 rounded dark:bg-secondary/30">
+              <TableRow
+                key={headerGroup.id}
+                className="mt-2 rounded p-2 dark:bg-secondary/30"
+              >
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
-                      className="text-foreground rounded cursor-pointer"
+                      className="cursor-pointer rounded text-foreground"
                       onClick={header.column.getToggleSortingHandler()}
                     >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {header.column.getIsSorted() && (
-                        header.column.getIsSorted() === 'asc'
-                          ? <ChevronUp className="inline ml-1" />
-                          : <ChevronDown className="inline ml-1" />
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
                       )}
+                      {header.column.getIsSorted() &&
+                        (header.column.getIsSorted() === 'asc' ? (
+                          <ChevronUp className="ml-1 inline" />
+                        ) : (
+                          <ChevronDown className="ml-1 inline" />
+                        ))}
                     </TableHead>
-                  )
+                  );
                 })}
               </TableRow>
             ))}
@@ -127,19 +159,25 @@ export default function ActiveNotifications() {
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className="hover:bg-secondary/10 rounded dark:hover:bg-secondary/20"
+                  data-state={row.getIsSelected() && 'selected'}
+                  className="rounded hover:bg-secondary/10 dark:hover:bg-secondary/20"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell
+                  colSpan={columns.length}
+                  className="h-24 text-center"
+                >
                   No active notifications.
                 </TableCell>
               </TableRow>
@@ -158,7 +196,7 @@ export default function ActiveNotifications() {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              <ChevronLeft className="h-4 w-4 mr-2" />
+              <ChevronLeft className="mr-2 h-4 w-4" />
               Previous
             </Button>
             <Button
@@ -168,11 +206,11 @@ export default function ActiveNotifications() {
               disabled={!table.getCanNextPage()}
             >
               Next
-              <ChevronRight className="h-4 w-4 ml-2" />
+              <ChevronRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

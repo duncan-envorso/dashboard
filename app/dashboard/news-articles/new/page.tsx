@@ -1,11 +1,7 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { ArrowLeft } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import BlogEditor from '@/components/blog/Tiptap'
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,40 +10,95 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import BlogEditor from '@/components/blog/Tiptap';
+import { useSession } from 'next-auth/react';
 
 export default function NewPostPage() {
-  const router = useRouter()
-  const [isAlertOpen, setIsAlertOpen] = useState(false)
+  const router = useRouter();
+  const [isAlertOpen, setIsAlertOpen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const session = useSession();
+  const teamId = session.data?.user.teamId;
+  const token = session.data?.user.token;
+
+  useEffect(() => {
+    // Check for draft in localStorage
+    const draft = localStorage.getItem('articleDraft');
+    if (draft) {
+      setHasUnsavedChanges(true);
+    }
+
+    // Warn before closing/reloading if there are unsaved changes
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Redirect if no teamId is provided
+  useEffect(() => {
+    if (!teamId) {
+      router.push('/dashboard/news-articles');
+    }
+  }, [teamId, router]);
 
   const handleGoBack = () => {
-    setIsAlertOpen(true)
-  }
+    if (hasUnsavedChanges) {
+      setIsAlertOpen(true);
+    } else {
+      router.push('/dashboard/news-articles');
+    }
+  };
 
   const handleConfirmGoBack = () => {
-    setIsAlertOpen(false)
-    router.back()
+    // Clear draft from localStorage
+    localStorage.removeItem('articleDraft');
+    setIsAlertOpen(false);
+    router.push('/dashboard/news-articles');
+  };
+
+  if (!teamId) {
+    return null; // or loading state
   }
 
   return (
-    <div className="">
-     <BlogEditor goBack={handleGoBack} />
+    <div className="min-h-screen bg-background">
+      <BlogEditor
+        goBack={handleGoBack}
+        teamId={teamId}
+        token={token ?? ''}
+        onDraftChange={(hasDraft) => setHasUnsavedChanges(hasDraft)}
+      />
 
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure you want to go back?</AlertDialogTitle>
+            <AlertDialogTitle>
+              Are you sure you want to go back?
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Any unsaved changes will be lost. This action cannot be undone.
+              You have unsaved changes that will be lost. This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmGoBack}>Yes, go back</AlertDialogAction>
+            <AlertDialogCancel>Continue editing</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmGoBack}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Discard changes
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
+  );
 }

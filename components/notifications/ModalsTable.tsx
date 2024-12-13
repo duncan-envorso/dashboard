@@ -20,10 +20,11 @@ import { Plus } from 'lucide-react';
 import NotificationTypeDialog from './NotifcationTypeDialog';
 import { useState } from 'react';
 import NotificationConfig from './ModalComponent';
-import { Card, CardContent } from '../ui/card';
 import { useSession } from 'next-auth/react';
+import NotificationsTable from './NotifcationsTable';
 
 const ModalsTable: React.FC = () => {
+  const { data: session, status } = useSession();
   const [notifications, setNotifications] = useState<MessageConfig[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
   const [selectedNotication, setSelectedNotication] =
@@ -32,8 +33,6 @@ const ModalsTable: React.FC = () => {
   const [selectedOption, setSelectedOption] = useState<'push' | 'Modal' | null>(
     null
   );
-  const { data: session } = useSession();
-  const getToken = () => session?.user?.token || '';
 
   const handleNotificationSent = (
     status:
@@ -85,7 +84,7 @@ const ModalsTable: React.FC = () => {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${getToken()}`
+              Authorization: `Bearer ${session?.user.token}` // Add the Bearer
             },
             body: JSON.stringify(notificationToSave)
           }
@@ -116,7 +115,7 @@ const ModalsTable: React.FC = () => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${getToken()}`
+              Authorization: `Bearer ${session?.user.token}` // Add the Bearer token here
             },
             body: JSON.stringify(notificationToSave)
           }
@@ -159,9 +158,9 @@ const ModalsTable: React.FC = () => {
     <div className="">
       <div className="">
         <div className="mb-6 flex items-center justify-between"></div>
-        <Tabs defaultValue="all" className="w-full  bg-white">
-          <TabsList className=" mb-4 flex items-center justify-between bg-white">
-            <div className="flex rounded-md bg-primary/90 p-1 text-secondary ">
+        <Tabs defaultValue="all" className="w-full ">
+          <TabsList className=" mb-4 flex items-center justify-between bg-slate-50 p-6">
+            <div className="flex  ">
               <TabsTrigger value="all">All</TabsTrigger>
               <TabsTrigger value="active">Active</TabsTrigger>
               <TabsTrigger value="draft">Drafts</TabsTrigger>
@@ -175,7 +174,8 @@ const ModalsTable: React.FC = () => {
               <Plus className="mr-2 h-4 w-4" /> New Notification
             </Button>
           </TabsList>
-          <div className="bg-slate-100 ">
+
+          <div className="">
             <TabsContent className="" value="all">
               <NotificationsCard />
             </TabsContent>
@@ -194,11 +194,13 @@ const ModalsTable: React.FC = () => {
           </div>
         </Tabs>
       </div>
+
       <NotificationTypeDialog
         isAddScreenOpen={isAddScreenOpen}
         setIsAddScreenOpen={setIsAddScreenOpen}
         handleAddOption={handleAddOption}
       />
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="border-primary bg-card sm:max-w-[800px]">
           <DialogHeader>

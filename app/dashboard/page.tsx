@@ -20,8 +20,12 @@ import {
   Users,
   UserCog
 } from 'lucide-react';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/auth';
 
-export default function Dashboard() {
+export default async function Dashboard() {
+  const session = await getServerSession(authOptions);
+  console.log('session', session);
   const pages = [
     {
       title: 'Team Roster',

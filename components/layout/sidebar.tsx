@@ -23,7 +23,7 @@ export default function Sidebar({ className }: SidebarProps) {
   const { isMinimized, toggle } = useSidebar();
   const { theme, setTheme } = useTheme();
   const { data: session } = useSession();
-  const [logo, setLogo] = useState('/logos/default-logo.png');
+  const [logo, setLogo] = useState('/logos/seawolves-logo.png');
 
   useEffect(() => {
     const loadLogo = async () => {
@@ -34,15 +34,13 @@ export default function Sidebar({ className }: SidebarProps) {
           if (res.ok) {
             setLogo(teamLogoPath);
           } else {
-            console.warn(`Team logo not found: ${teamLogoPath}`);
-            setLogo('/logos/default-logo.png');
+            setLogo('/logos/seawolves-logo.png');
           }
         } catch (error) {
-          console.error('Error loading team logo:', error);
-          setLogo('/logos/default-logo.png');
+          setLogo('/logos/seawolves-logo.png');
         }
       } else {
-        setLogo('/logos/default-logo.png');
+        setLogo('/logos/seawolves-logo.png');
       }
     };
     loadLogo();
@@ -50,10 +48,6 @@ export default function Sidebar({ className }: SidebarProps) {
 
   const handleToggle = () => {
     toggle();
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
   return (

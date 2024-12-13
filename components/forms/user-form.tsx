@@ -1,7 +1,7 @@
 'use client';
 
 import * as z from 'zod';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
@@ -28,189 +28,141 @@ export type Permission =
   | 'Manage Roster'
   | 'Manage Access';
 
-export interface User {
-  id: string; // UUID format
-  email: string;
-  permissions: Permission[]; // Array of permissions
+interface UserFormProps {
+  userId?: string;
+  initialData?: {
+    email: string;
+    permissions: Permission[];
+  };
 }
 
-// Form schema
 const formSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address' }),
-  permissions: z.record(z.boolean()).default({})
+  permissions: z.array(z.string())
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export const UserForm = ({ userId }: { userId?: string }) => {
+export const UserForm = ({ userId, initialData }: UserFormProps) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
-      permissions: {
-        Administrator: false,
-        'Live Commentary': false,
-        'Send Alerts': false,
-        'Post Articles': false,
-        'Manage Roster': false,
-        'Manage Access': false
-      }
+      email: initialData?.email || '',
+      permissions: initialData?.permissions || []
     }
   });
 
-  // Fetch user data if editing an existing user
-  useEffect(() => {
-    if (userId) {
-      const fetchUserData = async () => {
-        setLoading(true);
-        try {
-          const token = session?.user?.token;
-          if (!token) {
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: 'Authentication token is missing.'
-            });
-            return;
-          }
-
-          const response = await fetch(
-            `https://api.seawolves.envorso.com/v1/users/${userId}`,
-            {
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-              }
-            }
-          );
-
-          if (response.ok) {
-            const userData = await response.json();
-            // Populate the form with the fetched user data
-            form.setValue('email', userData.email);
-            const userPermissions = userData.permissions.reduce(
-              (acc: Record<Permission, boolean>, permission: Permission) => {
-                acc[permission] = true;
-                return acc;
-              },
-              {}
-            );
-            form.setValue('permissions', userPermissions);
-          } else {
-            const errorData = await response.json();
-            toast({
-              variant: 'destructive',
-              title: 'Error',
-              description: errorData.message || 'Failed to fetch user data.'
-            });
-          }
-        } catch (error) {
-          toast({
-            variant: 'destructive',
-            title: 'Error',
-            description: 'Something went wrong while fetching user data.'
-          });
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchUserData();
-    }
-  }, [userId, session, form, toast]);
-
   const onSubmit = async (data: FormValues) => {
-    try {
-      setLoading(true);
-
-      // Extract selected permissions
-      const selectedPermissions = Object.entries(data.permissions)
-        .filter(([_, isEnabled]) => isEnabled)
-        .map(([permission]) => permission as Permission);
-
-      // Get the bearer token from session
-      const token = session?.user?.token;
-      const teamId = session?.user?.teamId;
-
-      if (!token) {
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description: 'Authentication token is missing.'
-        });
-        return;
-      }
-
-      let apiUrl = 'https://api.seawolves.envorso.com/v1/signup';
-      let method = 'POST';
-      let body = JSON.stringify({
-        email: data.email,
-        password: 'securepassword', // Replace with your password generation logic
-        teamId: teamId // Use the current team ID
-      });
-
-      // If editing, update the user
-      if (userId) {
-        apiUrl = `https://api.seawolves.envorso.com/v1/users/${userId}`;
-        method = 'PUT';
-        body = JSON.stringify({
-          email: data.email,
-          permissions: selectedPermissions
-        });
-      }
-
-      const response = await fetch(apiUrl, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        toast({
-          variant: 'destructive',
-          title: 'Error',
-          description:
-            errorData.message ||
-            (userId ? 'Failed to update user.' : 'Failed to create user.')
-        });
-        return;
-      }
-
-      const successMessage = userId
-        ? 'User updated successfully.'
-        : 'User created successfully.';
-      toast({
-        title: 'Success',
-        description: successMessage
-      });
-
-      // Navigate to users list
-      router.push('/dashboard/users');
-    } catch (error) {
-      console.error('Error:', error);
+    if (!session?.user?.token) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Something went wrong.'
+        description: 'Not authenticated'
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      if (userId) {
+        // Update existing user
+        const currentPermissions = initialData?.permissions || [];
+        const newPermissions = data.permissions;
+
+        // Permissions to add
+        const permissionsToAdd = newPermissions.filter(
+          (p) => !currentPermissions.includes(p as Permission)
+        );
+
+        // Permissions to remove
+        const permissionsToRemove = currentPermissions.filter(
+          (p) => !newPermissions.includes(p)
+        );
+
+        // Add new permissions
+        for (const permission of permissionsToAdd) {
+          await fetch(
+            `https://api.seawolves.envorso.com/v1/users/${userId}/permissions`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${session.user.token}`
+              },
+              body: JSON.stringify({ permissionName: permission })
+            }
+          );
+        }
+
+        // Remove permissions
+        for (const permission of permissionsToRemove) {
+          await fetch(
+            `https://api.seawolves.envorso.com/v1/users/${userId}/permissions/${permission}`,
+            {
+              method: 'DELETE',
+              headers: {
+                Authorization: `Bearer ${session.user.token}`
+              }
+            }
+          );
+        }
+      } else {
+        // Create new user
+        await fetch('https://api.seawolves.envorso.com/v1/signup', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.user.token}`
+          },
+          body: JSON.stringify({
+            email: data.email,
+            permissions: data.permissions,
+            teamId: session.user.teamId
+          })
+        });
+      }
+
+      toast({
+        title: 'Success',
+        description: userId
+          ? 'User permissions updated successfully'
+          : 'User created successfully'
+      });
+
+      router.push('/dashboard/user-management');
+      router.refresh();
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: userId
+          ? 'Failed to update user permissions'
+          : 'Failed to create user'
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const availablePermissions: Permission[] = [
+    'Administrator',
+    'Live Commentary',
+    'Send Alerts',
+    'Post Articles',
+    'Manage Roster',
+    'Manage Access'
+  ];
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{userId ? 'Edit User' : 'Create User'}</CardTitle>
+        <CardTitle>{userId ? 'Edit User' : 'Create New User'}</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -223,9 +175,9 @@ export const UserForm = ({ userId }: { userId?: string }) => {
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={loading}
+                      disabled={!!userId} // Only disable in edit mode
                       type="email"
-                      placeholder="email@example.com"
+                      placeholder="Enter email address"
                       {...field}
                     />
                   </FormControl>
@@ -237,31 +189,43 @@ export const UserForm = ({ userId }: { userId?: string }) => {
             <FormField
               control={form.control}
               name="permissions"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel>Permissions</FormLabel>
                   <div className="space-y-2">
-                    {(Object.keys(field.value) as Permission[]).map(
-                      (permission) => (
-                        <div
-                          key={permission}
-                          className="flex items-center space-x-2"
-                        >
-                          <Checkbox
-                            disabled={loading}
-                            checked={field.value[permission]}
-                            onCheckedChange={(checked) => {
+                    {availablePermissions.map((permission) => (
+                      <div
+                        key={permission}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          disabled={loading}
+                          checked={form
+                            .watch('permissions')
+                            .includes(permission)}
+                          onCheckedChange={(checked) => {
+                            const currentPermissions =
+                              form.getValues('permissions');
+                            if (checked) {
+                              form.setValue('permissions', [
+                                ...currentPermissions,
+                                permission
+                              ]);
+                            } else {
                               form.setValue(
-                                `permissions.${permission}`,
-                                Boolean(checked)
-                              ); // Cast to boolean
-                            }}
-                          />
-
-                          <FormLabel>{permission}</FormLabel>
-                        </div>
-                      )
-                    )}
+                                'permissions',
+                                currentPermissions.filter(
+                                  (p) => p !== permission
+                                )
+                              );
+                            }
+                          }}
+                        />
+                        <FormLabel className="text-sm font-normal">
+                          {permission}
+                        </FormLabel>
+                      </div>
+                    ))}
                   </div>
                   <FormMessage />
                 </FormItem>

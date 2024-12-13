@@ -109,7 +109,6 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
           body: JSON.stringify({ ...notification, teamId: session.user.teamId })
         }
       );
-      console.log('Add notification response:', response);
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
@@ -139,12 +138,8 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
       throw new Error('No team ID available');
     }
 
-    console.log('Updating notification with Modal ID:', modalId);
-    console.log('Update payload:', updatedNotification);
-    console.log('teamId:', session.user.teamId);
     try {
       const url = `https://api.seawolves.envorso.com/v1/panel/in-app-modal/${session.user.teamId}/${modalId}`;
-      console.log('API URL:', url);
 
       const response = await fetch(url, {
         method: 'PUT',
@@ -154,8 +149,6 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
         },
         body: JSON.stringify(updatedNotification)
       });
-
-      console.log('Response status:', response.status);
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -168,7 +161,6 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
       }
 
       const updated: Notification = await response.json();
-      console.log('Updated notification:', updated);
 
       setNotifications((prev) =>
         prev.map((notif) => (notif.id === modalId ? updated : notif))
