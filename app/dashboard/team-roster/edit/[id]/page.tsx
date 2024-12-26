@@ -1,18 +1,17 @@
 // app/dashboard/team-roster/edit/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { RosterMember, StaffMember } from '@/types/team';
 import EditTeamMemberForm from '@/components/team-roster/EditTeamMemberForm';
 
 type TeamMember = RosterMember | StaffMember;
 
-export default function EditTeamMemberPage({
-  params
-}: {
-  params: { id: string };
+export default function EditTeamMemberPage(props: {
+  params: Promise<{ id: string }>;
 }) {
+  const params = use(props.params);
   const router = useRouter();
   const [member, setMember] = useState<TeamMember | null>(null);
   const [isLoading, setIsLoading] = useState(true);

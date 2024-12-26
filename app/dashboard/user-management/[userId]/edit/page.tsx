@@ -97,11 +97,10 @@ async function getUser(userId: string): Promise<User | null> {
   }
 }
 
-export default async function UserEditPage({
-  params
-}: {
-  params: { userId: string };
+export default async function UserEditPage(props: {
+  params: Promise<{ userId: string }>;
 }) {
+  const params = await props.params;
   const user = await getUser(params.userId);
 
   if (!user) {
