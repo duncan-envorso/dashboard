@@ -1,31 +1,26 @@
-// components/AuthRedirectButton.js
 'use client';
 import { useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
 
 const AuthRedirectButton = () => {
   const { data: session } = useSession();
 
   const handleRedirect = async () => {
-    // If user is authenticated, include their session token in the redirect
     const authParam = session?.accessToken
       ? `?token=${session.accessToken}`
       : '';
-
-    // Get the frontend URL from environment variables, falling back to a default if not set
     const frontendUrl =
       process.env.NEXT_PUBLIC_FRONTEND_URL || 'http://localhost:3001';
-
-    // Redirect to the authentication page of the other application
     window.location.href = `${frontendUrl}/api/auth/signin${authParam}`;
   };
 
   return (
-    <button
+    <Button
       onClick={handleRedirect}
-      className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+      className=" bg-primary text-primary-foreground hover:bg-primary/90"
     >
-      Sign into SeaWolves Website
-    </button>
+      Edit Seawolves Website
+    </Button>
   );
 };
 

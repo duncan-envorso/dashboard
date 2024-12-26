@@ -4,6 +4,8 @@
  * Represents a staff member's data
  */
 export interface StaffMember {
+  id?: string; // Add this
+
   team_id: string;
   name: string;
   job_title: string;
@@ -16,6 +18,8 @@ export interface StaffMember {
  * Represents a team roster member's data
  */
 export interface RosterMember {
+  id?: string; // Add this
+
   team_id: string;
   name: string;
   position: string;

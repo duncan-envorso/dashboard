@@ -18,38 +18,57 @@ import {
   Newspaper,
   Bell,
   Users,
-  UserCog
+  Settings,
+  TicketIcon
 } from 'lucide-react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/auth';
+import AuthRedirectButton from '@/components/AuthRedirectButton';
 
 export default async function Dashboard() {
   const session = await getServerSession(authOptions);
-  console.log('session', session);
+
   const pages = [
     {
       title: 'Team Roster',
       description: 'View and manage the team roster',
       icon: <Users className="h-6 w-6 text-primary" />,
-      link: '/dashboard/team-roster'
+      link: '/dashboard/team-roster',
+      type: 'internal'
     },
     {
       title: 'Notifications',
       description: 'Manage and send notifications to users',
       icon: <Bell className="h-6 w-6 text-primary" />,
-      link: '/dashboard/notifications'
+      link: '/dashboard/notifications',
+      type: 'internal'
     },
     {
       title: 'News Articles',
       description: 'Latest news and articles about the team',
       icon: <Newspaper className="h-6 w-6 text-primary" />,
-      link: '/dashboard/news-articles'
+      link: '/dashboard/news-articles',
+      type: 'internal'
     },
     {
       title: 'Live Commentary',
       description: 'Real-time match updates and commentary',
       icon: <MessageSquare className="h-6 w-6 text-primary" />,
-      link: '/dashboard/live-commentary'
+      link: '/dashboard/live-commentary',
+      type: 'internal'
+    },
+    {
+      title: 'Ticket Management',
+      description: 'Update ticket links for individual matches',
+      icon: <TicketIcon className="h-6 w-6 text-primary" />,
+      link: '/dashboard/ticket-management',
+      type: 'internal'
+    },
+    {
+      title: 'Edit Website',
+      description: 'Update Seawolves Website',
+      icon: <Settings className="h-6 w-6 text-primary" />,
+      type: 'external'
     }
   ];
 
@@ -92,11 +111,15 @@ export default async function Dashboard() {
                     <CardDescription>{page.description}</CardDescription>
                   </CardContent>
                   <CardFooter>
-                    <Link href={page.link} passHref>
-                      <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                        View
-                      </Button>
-                    </Link>
+                    {page.type === 'internal' ? (
+                      <Link href={page.link as string} passHref>
+                        <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
+                          View
+                        </Button>
+                      </Link>
+                    ) : (
+                      <AuthRedirectButton />
+                    )}
                   </CardFooter>
                 </Card>
               ))}

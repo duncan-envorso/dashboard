@@ -6,20 +6,23 @@ import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogFooter
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Trash2 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
 import { currentTeamConfig } from '@/teamConfig';
 import { useSession } from 'next-auth/react';
 import { CombinedTeamData, RosterMember, StaffMember } from '@/types/team';
+import EditTeamMemberForm from './EditTeamMemberForm';
+import { toast } from '../ui/use-toast';
 
 interface TeamRosterDashboardProps {
   apiFormattedData: CombinedTeamData;
@@ -37,7 +40,11 @@ export default function TeamRosterDashboard({
   const [editingMember, setEditingMember] = useState<
     RosterMember | StaffMember | null
   >(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deletingMember, setDeletingMember] = useState<
+    RosterMember | StaffMember | null
+  >(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const teamId = currentTeamConfig.teamId;
@@ -51,7 +58,11 @@ export default function TeamRosterDashboard({
     memberData: Partial<RosterMember | StaffMember>
   ) => {
     if (!session?.accessToken) {
-      console.log('No access token available');
+      toast({
+        title: 'Error',
+        description: 'No access token available',
+        variant: 'destructive'
+      });
       return;
     }
 
@@ -74,15 +85,67 @@ export default function TeamRosterDashboard({
       });
 
       if (response.ok) {
-        console.log('Member added successfully');
         setIsAddDialogOpen(false);
-        // You might want to refresh your data here
+        toast({
+          title: 'Success',
+          description: 'Member added successfully',
+          variant: 'default'
+        });
       } else {
         const errorData = await response.json();
         console.log('Failed to add member:', errorData);
+        toast({
+          title: 'Error',
+          description: 'Failed to add member',
+          variant: 'destructive'
+        });
       }
     } catch (error) {
       console.log('Error adding member:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred',
+        variant: 'destructive'
+      });
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!session?.accessToken || !deletingMember) return;
+
+    const endpoint = `https://api.seawolves.envorso.com/v1/teams/${teamId}/${
+      'is_coach' in deletingMember ? 'staff' : 'roster'
+    }/${deletingMember.id}`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`
+        }
+      });
+
+      if (response.ok) {
+        setIsDeleteDialogOpen(false);
+        toast({
+          title: 'Success',
+          description: 'Member deleted successfully'
+        });
+        return;
+      }
+
+      toast({
+        title: 'Error',
+        description: 'Failed to delete member',
+        variant: 'destructive'
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -101,46 +164,12 @@ export default function TeamRosterDashboard({
 
   const handleEdit = (member: RosterMember | StaffMember) => {
     setEditingMember(member);
-    setIsDialogOpen(true);
-  };
-
-  const handleSave = async () => {
-    if (!editingMember || !session?.accessToken) return;
-
-    const endpoint =
-      'is_coach' in editingMember
-        ? `https://api.seawolves.envorso.com/v1/teams/${teamId}/staff/${editingMember.team_id}`
-        : `https://api.seawolves.envorso.com/v1/teams/${teamId}/roster/${editingMember.team_id}`;
-
-    try {
-      const response = await fetch(endpoint, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`
-        },
-        body: JSON.stringify(editingMember)
-      });
-
-      if (response.ok) {
-        setIsDialogOpen(false);
-        setEditingMember(null);
-        // You might want to refresh your data here
-      }
-    } catch (error) {
-      console.error('Error saving member:', error);
-    }
-  };
-
-  const handleInputChange = (field: string, value: string | number) => {
-    if (editingMember) {
-      setEditingMember({ ...editingMember, [field]: value });
-    }
+    setIsEditDialogOpen(true);
   };
 
   const renderCard = (member: RosterMember | StaffMember) => (
     <Card
-      key={member.team_id}
+      key={member.id}
       className="overflow-hidden bg-card shadow-lg transition-shadow duration-300 hover:shadow-xl"
     >
       <div className="relative min-h-96">
@@ -171,12 +200,23 @@ export default function TeamRosterDashboard({
           )}
         </div>
       </div>
-      <CardContent className="p-4">
+      <CardContent className="space-y-2 p-4">
         <Button
           className="w-full bg-primary text-primary-foreground"
           onClick={() => handleEdit(member)}
         >
           Edit Member
+        </Button>
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={() => {
+            setDeletingMember(member);
+            setIsDeleteDialogOpen(true);
+          }}
+        >
+          <Trash2 className="mr-2 h-4 w-4" />
+          Delete Member
         </Button>
       </CardContent>
     </Card>
@@ -224,100 +264,41 @@ export default function TeamRosterDashboard({
         </Tabs>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-card sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className="font-bold text-foreground">
-              Edit Member: {editingMember?.name || 'Unknown'}
-            </DialogTitle>
-          </DialogHeader>
-          {editingMember ? (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
-                <Input
-                  id="name"
-                  value={editingMember.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="col-span-3"
-                />
-              </div>
-              {'position' in editingMember ? (
-                <>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="position" className="text-right">
-                      Position
-                    </Label>
-                    <Input
-                      id="position"
-                      value={editingMember.position}
-                      onChange={(e) =>
-                        handleInputChange('position', e.target.value)
-                      }
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="height" className="text-right">
-                      Height (cm)
-                    </Label>
-                    <Input
-                      id="height"
-                      type="number"
-                      value={editingMember.height}
-                      onChange={(e) =>
-                        handleInputChange('height', parseInt(e.target.value))
-                      }
-                      className="col-span-3"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="weight" className="text-right">
-                      Weight (kg)
-                    </Label>
-                    <Input
-                      id="weight"
-                      type="number"
-                      value={editingMember.weight}
-                      onChange={(e) =>
-                        handleInputChange('weight', parseInt(e.target.value))
-                      }
-                      className="col-span-3"
-                    />
-                  </div>
-                </>
-              ) : (
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="job_title" className="text-right">
-                    Job Title
-                  </Label>
-                  <Input
-                    id="job_title"
-                    value={(editingMember as StaffMember).job_title}
-                    onChange={(e) =>
-                      handleInputChange('job_title', e.target.value)
-                    }
-                    className="col-span-3"
-                  />
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="py-4 text-center text-gray-500">
-              No member selected for editing.
-            </div>
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+          {editingMember && (
+            <EditTeamMemberForm
+              type={'position' in editingMember ? 'roster' : 'staff'}
+              initialData={editingMember}
+              teamId={teamId}
+              onSuccess={() => {
+                setIsEditDialogOpen(false);
+              }}
+            />
           )}
-          <div className="flex justify-end">
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Member</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {deletingMember?.name}? This
+              action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
             <Button
-              onClick={handleSave}
-              className="bg-primary text-primary-foreground"
-              disabled={!editingMember}
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
             >
-              Save Changes
+              Cancel
             </Button>
-          </div>
+            <Button variant="destructive" onClick={handleDelete}>
+              Delete
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

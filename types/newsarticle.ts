@@ -14,12 +14,15 @@ export interface Article {
   id: number;
   team_id: string;
   title: string;
-  date_posted: string; // ISO 8601 date string
+  date_posted: string;
   date_formatted?: string;
   type: ArticleType;
   text: string;
   image: string;
   guid: string;
+  meta_description?: string;
+  meta_tags?: string;
+  status?: 'draft' | 'published';
 }
 
 /**

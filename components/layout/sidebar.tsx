@@ -11,7 +11,6 @@ import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { useSession } from 'next-auth/react';
-import { Badge } from '@/components/ui/badge';
 import AuthRedirectButton from '../AuthRedirectButton';
 
 type SidebarProps = {
@@ -89,8 +88,6 @@ export default function Sidebar({ className }: SidebarProps) {
           </div>
         </div>
       </div>
-
-      <AuthRedirectButton />
     </aside>
   );
 }

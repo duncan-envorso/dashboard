@@ -1,4 +1,7 @@
+'use client';
+
 import React, { useState } from 'react';
+import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { StaffMember, RosterMember } from '@/types/team';
 import { useSession } from 'next-auth/react';
+import { toast } from '../ui/use-toast';
 
 type EditTeamMemberFormProps = {
   type: 'staff' | 'roster';
@@ -28,6 +32,14 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
   const [error, setError] = useState('');
   const { data: session } = useSession();
 
+  const formatDateForAPI = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'yyyy-MM-dd');
+    } catch {
+      return dateString;
+    }
+  };
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -36,7 +48,7 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
     if (type === 'number') {
       setFormData((prev) => ({
         ...prev,
-        [name]: parseFloat(value)
+        [name]: parseFloat(value) || 0
       }));
       return;
     }
@@ -45,6 +57,14 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
       setFormData((prev) => ({
         ...prev,
         [name]: (e.target as HTMLInputElement).checked
+      }));
+      return;
+    }
+
+    if (name === 'date_of_birth') {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: formatDateForAPI(value)
       }));
       return;
     }
@@ -64,13 +84,16 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${session?.user.token}`
-        },
-        body: formData
-      });
+      const response = await fetch(
+        'https://api.seawolves.envorso.com/v1/upload',
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${session?.user.token}`
+          },
+          body: formData
+        }
+      );
 
       if (!response.ok) {
         throw new Error('Failed to upload image');
@@ -83,8 +106,39 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
       }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload image');
+      toast({
+        title: 'Error',
+        description: 'Failed to upload image. Please try again.',
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const validateFormData = () => {
+    if (type === 'roster') {
+      const requiredFields = [
+        'name',
+        'position',
+        'height',
+        'weight',
+        'hometown',
+        'date_of_birth',
+        'bio'
+      ];
+      for (const field of requiredFields) {
+        if (!formData[field as keyof typeof formData]) {
+          throw new Error(`${field.replace('_', ' ')} is required`);
+        }
+      }
+    } else {
+      const requiredFields = ['name', 'job_title', 'bio'];
+      for (const field of requiredFields) {
+        if (!formData[field as keyof typeof formData]) {
+          throw new Error(`${field.replace('_', ' ')} is required`);
+        }
+      }
     }
   };
 
@@ -94,27 +148,77 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
     setError('');
 
     try {
-      const endpoint = `/api/teams/${teamId}/${
+      validateFormData();
+
+      // Use id instead of team_id for existing members
+      const memberId = 'id' in formData ? formData.id : formData.team_id;
+      const isExistingMember = Boolean(memberId);
+
+      // Construct the endpoint based on the API documentation
+      const endpoint = `https://api.seawolves.envorso.com/v1/teams/${teamId}/${
         type === 'staff' ? 'staff' : 'roster'
-      }`;
+      }${isExistingMember ? `/${memberId}` : ''}`;
+
+      // Create request body based on member type
+      const requestBody = isRosterMember(formData)
+        ? {
+            name: formData.name,
+            position: formData.position,
+            height: formData.height,
+            weight: formData.weight,
+            hometown: formData.hometown,
+            date_of_birth: formData.date_of_birth?.split('T')[0],
+            bio: formData.bio,
+            portrait: formData.portrait,
+            is_active: formData.is_active
+          }
+        : {
+            name: formData.name,
+            job_title: formData.job_title,
+            bio: formData.bio,
+            portrait: formData.portrait,
+            is_coach: formData.is_coach
+          };
+
+      // Add debugging logs
+      console.log('Member ID:', memberId);
+      console.log('Request endpoint:', endpoint);
+      console.log('Request method:', isExistingMember ? 'PUT' : 'POST');
+      console.log('Request body:', requestBody);
+
       const response = await fetch(endpoint, {
-        method: 'POST',
+        method: isExistingMember ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.user.token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(requestBody)
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update team member');
+        throw new Error(
+          errorData.message ||
+            `Failed to ${isExistingMember ? 'update' : 'add'} team member`
+        );
       }
 
       const result = await response.json();
+      toast({
+        title: 'Success',
+        description: isExistingMember
+          ? 'Member updated successfully'
+          : 'Member added successfully'
+      });
       onSuccess?.(result);
     } catch (err) {
+      console.error('Error details:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
+      toast({
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'An error occurred',
+        variant: 'destructive'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -135,8 +239,9 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
   return (
     <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>
-          Edit {type === 'staff' ? 'Staff Member' : 'Player'}
+        <CardTitle className="font-industry-ultra">
+          {formData.team_id ? 'Edit' : 'Add'}{' '}
+          {type === 'staff' ? 'Staff Member' : 'Player'}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -272,7 +377,11 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
                   id="date_of_birth"
                   name="date_of_birth"
                   type="date"
-                  value={formData.date_of_birth}
+                  value={
+                    formData.date_of_birth
+                      ? format(new Date(formData.date_of_birth), 'yyyy-MM-dd')
+                      : ''
+                  }
                   onChange={handleInputChange}
                   required
                 />
@@ -296,7 +405,12 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
 
           {error && <div className="text-sm text-red-500">{error}</div>}
 
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button
+            variant={isLoading ? 'default' : 'secondary'}
+            type="submit"
+            disabled={isLoading}
+            className="hover:bg-green/90 w-full bg-black"
+          >
             {isLoading ? 'Saving...' : 'Save Changes'}
           </Button>
         </form>

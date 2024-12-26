@@ -11,6 +11,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Save, Eye, Upload, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import TitleInput from './TitleInput';
 import FeaturedImageUpload from './FeaturedImageUpload';
 import ContentEditor from './ContentEditor';
@@ -29,6 +31,66 @@ interface BlogEditorProps {
   token: string;
 }
 
+const MetaFields: React.FC<{
+  metaDescription: string;
+  setMetaDescription: (value: string) => void;
+  metaTags: string[];
+  setMetaTags: (tags: string[]) => void;
+}> = ({ metaDescription, setMetaDescription, metaTags, setMetaTags }) => {
+  const [tagInput, setTagInput] = useState('');
+
+  const handleAddTag = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && tagInput.trim()) {
+      setMetaTags([...metaTags, tagInput.trim()]);
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (indexToRemove: number) => {
+    setMetaTags(metaTags.filter((_, index) => index !== indexToRemove));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <label className="text-sm font-medium">Meta Description</label>
+        <Textarea
+          value={metaDescription}
+          onChange={(e) => setMetaDescription(e.target.value)}
+          placeholder="Enter meta description for SEO"
+          className="mt-1"
+        />
+      </div>
+      <div>
+        <label className="text-sm font-medium">Meta Tags</label>
+        <Input
+          value={tagInput}
+          onChange={(e) => setTagInput(e.target.value)}
+          onKeyDown={handleAddTag}
+          placeholder="Type tag and press Enter"
+          className="mt-1"
+        />
+        <div className="mt-2 flex flex-wrap gap-2">
+          {metaTags.map((tag, index) => (
+            <span
+              key={index}
+              className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-sm"
+            >
+              {tag}
+              <button
+                onClick={() => removeTag(index)}
+                className="ml-1 text-gray-500 hover:text-gray-700"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const API_BASE_URL = 'https://api.seawolves.envorso.com/v1';
 
 const BlogEditor: React.FC<BlogEditorProps> = ({
@@ -43,6 +105,12 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
   const [wordCount, setWordCount] = useState(0);
   const [activeTab, setActiveTab] = useState('edit');
   const [isSaving, setIsSaving] = useState(false);
+  const [metaDescription, setMetaDescription] = useState(
+    post?.meta_description || ''
+  );
+  const [metaTags, setMetaTags] = useState<string[]>(
+    post?.meta_tags ? JSON.parse(post?.meta_tags) : []
+  );
   const router = useRouter();
   const { toast } = useToast();
 
@@ -79,25 +147,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     }
   }, [editor]);
 
-  useEffect(() => {
-    const saveDraft = () => {
-      if (editor) {
-        const content = editor.getHTML();
-        localStorage.setItem(
-          'articleDraft',
-          JSON.stringify({ title, content, image, type })
-        );
-        toast({
-          description: 'Draft saved automatically',
-          duration: 2000
-        });
-      }
-    };
-    const interval = setInterval(saveDraft, 30000); // Save every 30 seconds
-    return () => clearInterval(interval);
-  }, [editor, title, image, type, toast]);
-
-  const handleSubmit = async () => {
+  const handleSubmit = async (isDraft: boolean = false) => {
     if (!editor || !title.trim()) {
       toast({
         variant: 'destructive',
@@ -108,12 +158,17 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     }
 
     setIsSaving(true);
-    const articleData = {
+    const articleData: Partial<Article> & {
+      team_id: string;
+      title: string;
+      text: string;
+    } = {
       team_id: teamId,
       title: title.trim(),
       text: editor.getHTML(),
       image,
       type,
+      status: isDraft ? 'draft' : 'published',
       date_posted: post?.date_posted || new Date().toISOString(),
       guid: post?.guid || crypto.randomUUID()
     };
@@ -140,13 +195,13 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       }
 
       const data: CreateArticleResponse = await response.json();
-
-      // Clear draft after successful save
       localStorage.removeItem('articleDraft');
 
       toast({
         title: 'Success!',
-        description: post?.id
+        description: isDraft
+          ? 'Draft saved successfully'
+          : post?.id
           ? 'Article updated successfully'
           : 'Article published successfully'
       });
@@ -154,7 +209,6 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       router.push('/dashboard/news-articles');
     } catch (error) {
       console.error('Error saving article:', error);
-
       let errorMessage = 'Failed to save the article. Please try again.';
 
       if (error instanceof Error) {
@@ -207,25 +261,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  if (editor) {
-                    const content = editor.getHTML();
-                    localStorage.setItem(
-                      'articleDraft',
-                      JSON.stringify({ title, content, image, type })
-                    );
-                    toast({
-                      description: 'Draft saved successfully'
-                    });
-                  }
-                }}
+                onClick={(e: React.MouseEvent) => handleSubmit(true)}
                 className="transition-colors duration-200 hover:bg-primary/10"
               >
                 <Save className="mr-2 h-4 w-4" />
                 Save Draft
               </Button>
               <Button
-                onClick={handleSubmit}
+                onClick={(e: React.MouseEvent) => handleSubmit(false)}
                 className="bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
                 disabled={isSaving}
               >
@@ -272,6 +315,12 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
                 <FeaturedImageUpload
                   featuredImage={image}
                   setFeaturedImage={setImage}
+                />
+                <MetaFields
+                  metaDescription={metaDescription}
+                  setMetaDescription={setMetaDescription}
+                  metaTags={metaTags}
+                  setMetaTags={setMetaTags}
                 />
                 <ContentEditor
                   editor={editor}

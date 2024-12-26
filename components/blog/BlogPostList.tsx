@@ -15,6 +15,7 @@ import {
   TableRow
 } from '../ui/table';
 import { Article, ArticleType } from '@/types/newsarticle';
+import { useRouter } from 'next/navigation';
 
 type Props = {
   initialPosts: Article[];
@@ -23,6 +24,7 @@ type Props = {
 export default function BlogPostList({ initialPosts = [] }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
   const [posts] = useState<Article[]>(initialPosts);
+  const router = useRouter();
 
   const filteredPosts = posts.filter((post) =>
     post.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -94,7 +96,14 @@ export default function BlogPostList({ initialPosts = [] }: Props) {
                       : 'N/A'}
                   </TableCell>
                   <TableCell className="pl-4 text-right">
-                    <Button variant="ghost" size="sm" className="mr-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="mr-2"
+                      onClick={() =>
+                        router.push(`/dashboard/news-articles/${post.id}`)
+                      }
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Link href={`/dashboard/news-articles/${post.id}/edit`}>

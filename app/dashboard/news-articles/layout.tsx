@@ -1,14 +1,14 @@
-import React from "react"
+import React from 'react';
 
 export const metadata = {
-    title: 'Blog Posts',
-    description: 'Manage your blog posts',
-  }
-  
-  export default function PostsLayout({
-    children,
-  }: {
-    children: React.ReactNode
-  }) {
-    return <>{children}</>
-  } 
+  title: 'Blog Posts',
+  description: 'Manage your blog posts'
+};
+
+export default function PostsLayout({
+  children
+}: {
+  children: React.ReactNode;
+}) {
+  return <div className="min-h-screen">{children}</div>;
+}

@@ -1,6 +1,5 @@
 import { NavItem } from '@/types';
-import { Badge } from "@/components/ui/badge";
-
+import { Badge } from '@/components/ui/badge';
 
 export interface User {
   id: number;
@@ -26,7 +25,7 @@ export const users: User[] = [
   },
   {
     id: 2,
-    name: 'James O\'Connor',
+    name: "James O'Connor",
     department: 'Coaching',
     role: 'Performance Analyst',
     verified: true,
@@ -187,15 +186,18 @@ export const navItems: NavItem[] = [
     label: 'Dashboard',
     badge: 'Coming Soon'
   },
-
+  {
+    title: 'Ticket Management',
+    href: '/dashboard/ticket-management',
+    icon: 'messageSquare',
+    label: 'Dashboard'
+  },
 
   {
     title: 'User Management',
     href: '/dashboard/user-management',
     icon: 'settings',
-    label: 'settings',
+    label: 'settings'
     // badge: 'Coming Soon' // Remove the JSX element and just use a string
-
-  },
- 
+  }
 ];

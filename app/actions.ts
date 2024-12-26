@@ -163,7 +163,7 @@ export async function getPosts(page = 1, perPage = 20): Promise<Article[]> {
 
   try {
     const response = await fetch(
-      `https://api.seawolves.envorso.com/v1/articles?page=${page}&per_page=${perPage}`,
+      `https://api.seawolves.envorso.com/v1/articles?teamId=seawolvesTeamId&status=draft&status=published`,
       {
         headers: {
           Authorization: `Bearer ${session.user.token}`,
