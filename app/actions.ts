@@ -4,20 +4,18 @@ import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import authConfig from '@/auth.config';
 import { MatchData } from '@/types/match';
-import { CombinedTeamData, RosterMember, StaffMember } from '@/types/team';
+import { CombinedTeamData } from '@/types/team';
 import { Article } from '@/types/newsarticle';
 import { authOptions } from '@/auth';
 
-const API_URL = `${process.env.NEXT_API_URL}`;
+const API_URL = process.env.NEXT_API_URL;
 if (!API_URL) {
-  console.log('NEXT_API_URL is not defined in the environment variables');
+  throw new Error('NEXT_API_URL environment variable is not defined');
 }
 
 const TEAM_ID = '034db172-942f-48b8-bc91-a0b3eb3a025f';
 
 export async function createArticle(formData: any) {
-  const API_URL = `${process.env.NEXT_API_URL}`;
-
   const response = await fetch(`${API_URL}/articles`, {
     method: 'POST',
     headers: {
@@ -35,8 +33,6 @@ export async function createArticle(formData: any) {
 }
 
 export async function getUsers() {
-  const API_URL = `${process.env.NEXT_API_URL}`;
-
   try {
     const session = await getServerSession(authConfig);
     const token = session?.user?.token;
@@ -66,8 +62,6 @@ export async function getUsers() {
 }
 
 export async function getUserPermissions(userId: string) {
-  const API_URL = `${process.env.NEXT_API_URL}`;
-
   try {
     const session = await getServerSession(authConfig);
     const token = session?.user?.token;
@@ -95,32 +89,34 @@ export async function getUserPermissions(userId: string) {
     return { error: 'Failed to fetch user permissions' };
   }
 }
-
 export async function fetchTeamData(): Promise<CombinedTeamData> {
-  const API_URL = `${process.env.NEXT_API_URL}`;
+  // Log environment for debugging
+  console.log('NODE_ENV:', process.env.NODE_ENV);
+  console.log('API URL:', process.env.NEXT_API_URL);
 
   if (!currentTeamConfig) {
     notFound();
   }
 
-  const baseUrl = `${API_URL}/teams`;
   const requestConfig = {
     headers: {
-      'x-client-app-version': '2.0.17'
+      'x-client-app-version': '2.0.17',
+      'Content-Type': 'application/json'
+    },
+    next: {
+      revalidate: 0 // Disable cache in production
     }
   };
 
   try {
     const [rosterResponse, staffResponse] = await Promise.all([
-      fetch(`${baseUrl}/${TEAM_ID}/roster`, requestConfig),
-      fetch(`${baseUrl}/${TEAM_ID}/staff`, requestConfig)
+      fetch(`${API_URL}/teams/${TEAM_ID}/roster`, requestConfig),
+      fetch(`${API_URL}/teams/${TEAM_ID}/staff`, requestConfig)
     ]);
 
     if (!rosterResponse.ok || !staffResponse.ok) {
-      console.log(
-        `Failed to fetch data: ${!rosterResponse.ok ? 'roster' : ''} ${
-          !staffResponse.ok ? 'staff' : ''
-        }`
+      throw new Error(
+        `API Error: ${rosterResponse.status} ${staffResponse.status}`
       );
     }
 
@@ -129,29 +125,14 @@ export async function fetchTeamData(): Promise<CombinedTeamData> {
       staffResponse.json()
     ]);
 
-    roster.sort(
-      (
-        a: { createdAt: string | number | Date },
-        b: { createdAt: string | number | Date }
-      ) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-    staff.sort(
-      (
-        a: { createdAt: string | number | Date },
-        b: { createdAt: string | number | Date }
-      ) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
-
     return { roster, staff };
   } catch (error) {
-    console.log('Error fetching team data:', error);
-    notFound();
+    console.error('Error fetching team data:', error);
+    throw error;
   }
 }
 
 export async function getMatchData(matchId: string): Promise<MatchData> {
-  const API_URL = `${process.env.NEXT_API_URL}`;
-
   try {
     const response = await fetch(
       `${API_URL}/matches/${matchId}?responseType=preview`,
@@ -173,8 +154,6 @@ export async function getMatchData(matchId: string): Promise<MatchData> {
 }
 
 export async function getPosts(page = 1, perPage = 20): Promise<Article[]> {
-  const API_URL = `${process.env.NEXT_API_URL}`;
-
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.token) {
@@ -206,8 +185,6 @@ export async function getPosts(page = 1, perPage = 20): Promise<Article[]> {
 }
 
 export async function getArticle(id: string) {
-  const API_URL = `${process.env.NEXT_API_URL}`;
-
   try {
     const response = await fetch(`${API_URL}/articles/${id}`);
     const data = response.json();
@@ -262,7 +239,7 @@ export async function upsertTeamMember({
 }
 
 export async function uploadImage(file: FormData, token: string) {
-  console.log('API_URL:', API_URL); // Debug
+  console.log('API_URL:', API_URL);
 
   const response = await fetch(`${API_URL}/upload`, {
     method: 'POST',
@@ -296,15 +273,15 @@ export async function deleteMember({
 
   console.log('memberId', memberId);
 
-  const API_URL = process.env.NEXT_API_URL;
-  const endpoint = `${API_URL}/teams/${teamId}/${type}/${memberId}`;
-
-  const response = await fetch(endpoint, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${token}`
+  const response = await fetch(
+    `${API_URL}/teams/${teamId}/${type}/${memberId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
     }
-  });
+  );
 
   if (!response.ok) {
     const error = await response.json();
