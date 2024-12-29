@@ -62,7 +62,6 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
   };
 
   const API_URL = process.env.NEXT_API_URL;
-
   const NOTIFICATIONS_ENDPOINT = `${API_URL}/panel/in-app-modal`;
 
   const fetchNotifications = async () => {
@@ -71,19 +70,17 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
       setLoading(false);
       return;
     }
-
     setLoading(true);
     setError(null);
     try {
       const response = await fetch(
-        `https://api.seawolves.envorso.com/v1/panel/in-app-modal/${session.user.teamId}`,
+        `${NOTIFICATIONS_ENDPOINT}/${session.user.teamId}`,
         {
           headers: {
             Authorization: `Bearer ${session.user.token}`
           }
         }
       );
-
       if (!response.ok) {
         throw new Error('Failed to fetch notifications');
       }
@@ -100,7 +97,6 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
     if (!session?.user?.teamId) {
       throw new Error('No team ID available');
     }
-
     try {
       const response = await fetch(NOTIFICATIONS_ENDPOINT, {
         method: 'POST',
@@ -110,7 +106,6 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
         },
         body: JSON.stringify({ ...notification, teamId: session.user.teamId })
       });
-
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
@@ -119,7 +114,6 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
           }`
         );
       }
-
       const newNotification: Notification = await response.json();
       setNotifications((prev) => [...prev, newNotification]);
     } catch (err) {
