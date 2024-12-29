@@ -8,6 +8,9 @@ import { useToast } from '@/components/ui/use-toast';
 import TicketManagement from './_components/ticket-management';
 import { useSession } from 'next-auth/react';
 
+const API_URL = process.env.NEXT_API_URL;
+const MATCHES_ENDPOINT = `${API_URL}/matches`;
+
 export default function TicketsPage() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [error, setError] = useState<string>('');
@@ -17,9 +20,7 @@ export default function TicketsPage() {
 
   const fetchMatches = async () => {
     try {
-      const response = await fetch(
-        'https://api.seawolves.envorso.com/v1/matches'
-      );
+      const response = await fetch(MATCHES_ENDPOINT);
       if (!response.ok) throw new Error('Failed to fetch matches');
 
       const data: MatchData = await response.json();
@@ -46,17 +47,14 @@ export default function TicketsPage() {
 
   const updateTicketUrl = async (matchId: string, ticketsUrl: string) => {
     try {
-      const response = await fetch(
-        `https://api.seawolves.envorso.com/v1/matches/${matchId}`,
-        {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.data?.accessToken}`
-          },
-          body: JSON.stringify({ ticketsUrl })
-        }
-      );
+      const response = await fetch(`${MATCHES_ENDPOINT}/${matchId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.data?.accessToken}`
+        },
+        body: JSON.stringify({ ticketsUrl })
+      });
 
       if (!response.ok) {
         const error = await response.json();

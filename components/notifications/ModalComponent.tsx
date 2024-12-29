@@ -145,6 +145,8 @@ export default function NotificationConfig({
     onNotificationSent('Draft');
     setNotificationStatus('Notification saved as draft');
   };
+  const API_URL = process.env.NEXT_API_URL;
+  const NOTIFICATIONS_ENDPOINT = `${API_URL}/panel/in-app-modal`;
 
   const sendNotification = async () => {
     try {
@@ -155,6 +157,7 @@ export default function NotificationConfig({
       if (!localConfig.teamId) {
         throw new Error('Team ID is missing');
       }
+
       const scheduledDateTime = moment
         .tz(
           `${localConfig.scheduledDate?.split('T')[0]}T${
@@ -165,12 +168,12 @@ export default function NotificationConfig({
         .toISOString();
 
       const response = await fetch(
-        `https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=${localConfig.teamId}`,
+        `${NOTIFICATIONS_ENDPOINT}?teamId=${localConfig.teamId}`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${session?.user.token}` // Add the Bearer token here
+            Authorization: `Bearer ${session?.user.token}`
           },
           body: JSON.stringify({
             teamId: localConfig.teamId,

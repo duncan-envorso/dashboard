@@ -2,22 +2,11 @@
 
 import { useSession } from 'next-auth/react';
 import Script from 'next/script';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-export default function HeapAnalytics(): JSX.Element {
+export default function HeapAnalytics(): React.ReactNode {
   const { data: session, status } = useSession();
   const [scriptLoaded, setScriptLoaded] = useState<boolean>(false);
-
-//   useEffect(() => {
-//     if (session) {
-//       identifyUser(session.user.email);
-//       addUserProperties({
-//         name: session.user.name,
-//         userId: session.user.id,
-//         email: session.user.email
-//       });
-//     }
-//   }, [scriptLoaded, session, status]);
 
   const scriptReady = (): void => {
     if (window.heap) {

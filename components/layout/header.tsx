@@ -5,12 +5,12 @@ import { UserNav } from './user-nav';
 
 export default function Header() {
   return (
-    <header className="fixed top-0 left-0 right-0 bg-transparent z-50  ">
+    <header className="fixed left-0 right-0 top-0 z-50 bg-transparent  ">
       <nav className="flex items-center justify-between px-4 py-2 lg:justify-end">
-      <div className={cn('block lg:hidden')}>
-        <MobileSidebar />
+        <div className={cn('block lg:hidden')}>
+          <MobileSidebar />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="mb-3 mr-40 flex items-center gap-2">
           <UserNav />
           {/* <ThemeToggle /> */}
         </div>

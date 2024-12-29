@@ -50,6 +50,8 @@ export default function TeamRosterDashboard({
   const teamId = currentTeamConfig.teamId;
   const { data: session } = useSession();
 
+  console.log(session);
+
   const handleAdd = () => {
     setIsAddDialogOpen(true);
   };
@@ -66,10 +68,11 @@ export default function TeamRosterDashboard({
       return;
     }
 
+    const API_URL = process.env.NEXT_API_URL;
     const endpoint =
       'is_coach' in memberData
-        ? `https://api.seawolves.envorso.com/v1/teams/${teamId}/staff`
-        : `https://api.seawolves.envorso.com/v1/teams/${teamId}/roster`;
+        ? `${API_URL}/teams/${teamId}/staff`
+        : `${API_URL}/teams/${teamId}/roster`;
 
     try {
       const response = await fetch(endpoint, {
@@ -83,6 +86,8 @@ export default function TeamRosterDashboard({
           ...memberData
         })
       });
+
+      console.log(response);
 
       if (response.ok) {
         setIsAddDialogOpen(false);
@@ -112,8 +117,8 @@ export default function TeamRosterDashboard({
 
   const handleDelete = async () => {
     if (!session?.accessToken || !deletingMember) return;
-
-    const endpoint = `https://api.seawolves.envorso.com/v1/teams/${teamId}/${
+    const API_URL = process.env.NEXT_API_URL;
+    const endpoint = `${API_URL}/teams/${teamId}/${
       'is_coach' in deletingMember ? 'staff' : 'roster'
     }/${deletingMember.id}`;
 
@@ -266,6 +271,8 @@ export default function TeamRosterDashboard({
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+          <DialogTitle className="hidden">Add Member</DialogTitle>
+
           {editingMember && (
             <EditTeamMemberForm
               type={'position' in editingMember ? 'roster' : 'staff'}

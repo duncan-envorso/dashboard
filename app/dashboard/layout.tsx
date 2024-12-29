@@ -16,21 +16,16 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    
-
-      <div className="flex h-screen bg-background text-foreground font-industry">
-        <Sidebar />
-        <main className="just bg-slate-100 flex flex-col items-start justify-start w-full min-h-screen">
-       
-          <ScrollArea className="w-full">
-            <div className=" m-2">
+    <div className="font-industry flex h-screen bg-background text-foreground">
+      <Sidebar />
+      <main className="just flex min-h-screen w-full flex-col items-start justify-start bg-slate-100">
+        <ScrollArea className="w-full">
+          <div className=" p-10">
             <Header />
-              {children}
-            </div>
-          </ScrollArea>
-        </main>
-      </div>
-     
-   
+            {children}
+          </div>
+        </ScrollArea>
+      </main>
+    </div>
   );
 }

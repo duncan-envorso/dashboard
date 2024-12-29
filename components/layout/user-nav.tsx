@@ -9,47 +9,62 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { signOut, useSession } from 'next-auth/react';
 import { useState } from 'react';
+import {
+  CreditCard,
+  LayoutGrid,
+  LogOut,
+  Settings,
+  User,
+  Users
+} from 'lucide-react';
 
 export function UserNav() {
   const { data: session } = useSession();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   if (!session) {
-    return null; // Or render a sign-in button
+    return null;
   }
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
     try {
-      await signOut({ 
+      await signOut({
         redirect: false,
-        callbackUrl: '/' // Specify the URL to redirect to after sign out
+        callbackUrl: '/'
       });
-      // Instead of manually redirecting, let NextAuth handle it
-      // The page should automatically redirect to '/' as specified in callbackUrl
     } catch (error) {
       console.error('Error signing out:', error);
       setIsSigningOut(false);
     }
   };
 
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={session.user?.image ?? ''}
-              alt={session.user?.name ?? ''}
-            />
-            <AvatarFallback>{session.user?.name?.[0]}</AvatarFallback>
+        <Button
+          variant="link"
+          className="hovre:bg-white relative flex h-10 w-full items-center justify-start space-x-2 px-2 md:px-4"
+        >
+          <Avatar className="h-7 w-7 ">
+            {session.user?.image ? (
+              <AvatarImage
+                src={session.user.image}
+                alt={session.user.name ?? ''}
+              />
+            ) : (
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {session.user?.name?.[0] || session.user.email?.[0]}
+              </AvatarFallback>
+            )}
           </Avatar>
+          <span className="hidden text-sm font-medium md:inline-flex">
+            {session.user?.name || session.user?.email}
+          </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
@@ -66,26 +81,34 @@ export function UserNav() {
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem>
-            Profile
-            <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+            <User className="mr-2 h-4 w-4" />
+            <span>Profile</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            Billing
-            <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+            <CreditCard className="mr-2 h-4 w-4" />
+            <span>Billing</span>
           </DropdownMenuItem>
           <DropdownMenuItem>
-            Settings
-            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Settings</span>
           </DropdownMenuItem>
-          <DropdownMenuItem>New Team</DropdownMenuItem>
+          <DropdownMenuItem>
+            <Users className="mr-2 h-4 w-4" />
+            <span>Team</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <LayoutGrid className="mr-2 h-4 w-4" />
+            <span>Dashboard</span>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem 
+        <DropdownMenuItem
+          className="text-red-600 dark:text-red-500"
           onClick={handleSignOut}
           disabled={isSigningOut}
         >
-          {isSigningOut ? 'Signing out...' : 'Log out'}
-          <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>{isSigningOut ? 'Signing out...' : 'Log out'}</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

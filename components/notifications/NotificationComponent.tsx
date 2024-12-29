@@ -47,7 +47,7 @@ export default function NotificationComponent() {
       }
 
       const response = await fetch(
-        'https://api.seawolves.envorso.com/v1/panel/notifications?teamId=034db172-942f-48b8-bc91-a0b3eb3a025f',
+        `${process.env.NEXT_API_URL}/panel/notifications?teamId=034db172-942f-48b8-bc91-a0b3eb3a025f`,
         {
           method: 'POST',
           headers: {

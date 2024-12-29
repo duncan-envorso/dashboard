@@ -21,6 +21,20 @@ import { RosterMember, StaffMember } from '@/types/team';
 
 type MemberType = 'roster' | 'staff';
 
+const RUGBY_POSITIONS = [
+  'Flanker',
+  'Hooker',
+  'Prop',
+  'Fly-Half',
+  'Wing',
+  'Fullback',
+  'Lock',
+  'Scrum Half',
+  'Center',
+  'Outside Back',
+  'Number Eight'
+] as const;
+
 interface AddMemberDialogProps {
   isOpen: boolean;
   teamId: string;
@@ -164,13 +178,21 @@ export function AddMemberDialog({
         <Label htmlFor="position" className="text-right">
           Position
         </Label>
-        <Input
-          id="position"
+        <Select
           value={memberData.position}
-          onChange={(e) => handleInputChange('position', e.target.value)}
-          className="col-span-3"
-          placeholder="Enter position"
-        />
+          onValueChange={(value) => handleInputChange('position', value)}
+        >
+          <SelectTrigger className="col-span-3">
+            <SelectValue placeholder="Select position" />
+          </SelectTrigger>
+          <SelectContent>
+            {RUGBY_POSITIONS.map((position) => (
+              <SelectItem key={position} value={position}>
+                {position}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="height" className="text-right">

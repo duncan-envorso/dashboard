@@ -16,7 +16,7 @@ import {
 import { Loader2 } from 'lucide-react';
 import type { Article } from '@/types/newsarticle';
 
-const API_BASE_URL = 'https://api.seawolves.envorso.com/v1';
+const API_BASE_URL = `${process.env.NEXT_API_URL}`;
 
 export default function EditPostPage() {
   const router = useRouter();

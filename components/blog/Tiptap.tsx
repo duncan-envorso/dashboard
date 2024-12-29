@@ -91,7 +91,7 @@ const MetaFields: React.FC<{
   );
 };
 
-const API_BASE_URL = 'https://api.seawolves.envorso.com/v1';
+const API_BASE_URL = `${process.env.NEXT_API_URL}`;
 
 const BlogEditor: React.FC<BlogEditorProps> = ({
   post,

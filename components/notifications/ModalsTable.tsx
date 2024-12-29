@@ -64,6 +64,10 @@ const ModalsTable: React.FC = () => {
     setIsDialogOpen(true);
   };
 
+  const API_URL = process.env.NEXT_API_URL;
+  const NOTIFICATIONS_ENDPOINT = `${API_URL}/panel/in-app-modal`;
+  const TEAM_ID = '034db172-942f-48b8-bc91-a0b3eb3a025f';
+
   const handleSave = async (updatedNotification: MessageConfig) => {
     try {
       const notificationToSave = {
@@ -77,14 +81,13 @@ const ModalsTable: React.FC = () => {
       };
 
       if (selectedNotication) {
-        // Edit existing notification
         const response = await fetch(
-          `https://api.seawolves.envorso.com/v1/panel/in-app-modal/${selectedNotication.id}`,
+          `${NOTIFICATIONS_ENDPOINT}/${selectedNotication.id}`,
           {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${session?.user.token}` // Add the Bearer
+              Authorization: `Bearer ${session?.user.token}`
             },
             body: JSON.stringify(notificationToSave)
           }
@@ -95,7 +98,6 @@ const ModalsTable: React.FC = () => {
         }
 
         const updatedNotif = await response.json();
-
         setNotifications((prev) =>
           prev.map((notif) =>
             notif.id === selectedNotication.id ? updatedNotif : notif
@@ -108,14 +110,13 @@ const ModalsTable: React.FC = () => {
             'Your notification has been updated and set to draft status'
         });
       } else {
-        // Add new notification
         const response = await fetch(
-          'https://api.seawolves.envorso.com/v1/panel/in-app-modal?teamId=034db172-942f-48b8-bc91-a0b3eb3a025f',
+          `${NOTIFICATIONS_ENDPOINT}?teamId=${TEAM_ID}`,
           {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              Authorization: `Bearer ${session?.user.token}` // Add the Bearer token here
+              Authorization: `Bearer ${session?.user.token}`
             },
             body: JSON.stringify(notificationToSave)
           }
@@ -126,9 +127,6 @@ const ModalsTable: React.FC = () => {
         }
 
         const newNotif = await response.json();
-
-        console.log('newNotif', newNotif);
-
         setNotifications((prev) => [...prev, newNotif]);
 
         toast({

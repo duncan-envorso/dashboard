@@ -11,17 +11,12 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import UserAuthForm from './forms/user-auth-form';
 
 const Auth = () => {
-  const handleGoogleSignIn = () => {
-    console.log('Google sign in clicked');
-  };
+  const handleGoogleSignIn = () => {};
 
-  const handleMLRSignIn = () => {
-    console.log('MLR sign in clicked');
-  };
+  const handleMLRSignIn = () => {};
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-r from-gray-100 to-gray-200 p-4 dark:from-gray-900 dark:to-gray-800">
@@ -35,12 +30,7 @@ const Auth = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="space-y-4"
-          >
+          <div className="space-y-4">
             <UserAuthForm />
 
             <div className="relative">
@@ -100,7 +90,7 @@ const Auth = () => {
               </div>
               Sign in with MLR Credentials
             </Button>
-          </motion.div>
+          </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
           <p className="text-center text-sm text-muted-foreground">

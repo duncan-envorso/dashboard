@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { StaffMember, RosterMember } from '@/types/team';
 import { useSession } from 'next-auth/react';
 import { toast } from '../ui/use-toast';
+import { uploadImage, upsertTeamMember } from '@/app/actions';
 
 type EditTeamMemberFormProps = {
   type: 'staff' | 'roster';
@@ -37,6 +38,32 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
       return format(new Date(dateString), 'yyyy-MM-dd');
     } catch {
       return dateString;
+    }
+  };
+
+  const validateFormData = () => {
+    if (type === 'roster') {
+      const requiredFields = [
+        'name',
+        'position',
+        'height',
+        'weight',
+        'hometown',
+        'date_of_birth',
+        'bio'
+      ];
+      for (const field of requiredFields) {
+        if (!formData[field as keyof typeof formData]) {
+          throw new Error(`${field.replace('_', ' ')} is required`);
+        }
+      }
+    } else {
+      const requiredFields = ['name', 'job_title', 'bio'];
+      for (const field of requiredFields) {
+        if (!formData[field as keyof typeof formData]) {
+          throw new Error(`${field.replace('_', ' ')} is required`);
+        }
+      }
     }
   };
 
@@ -84,26 +111,8 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
       const formData = new FormData();
       formData.append('file', file);
 
-      const response = await fetch(
-        'https://api.seawolves.envorso.com/v1/upload',
-        {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${session?.user.token}`
-          },
-          body: formData
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-
-      const { url } = await response.json();
-      setFormData((prev) => ({
-        ...prev,
-        portrait: url
-      }));
+      const { url } = await uploadImage(formData, session?.user.token!);
+      setFormData((prev) => ({ ...prev, portrait: url }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to upload image');
       toast({
@@ -116,32 +125,6 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
     }
   };
 
-  const validateFormData = () => {
-    if (type === 'roster') {
-      const requiredFields = [
-        'name',
-        'position',
-        'height',
-        'weight',
-        'hometown',
-        'date_of_birth',
-        'bio'
-      ];
-      for (const field of requiredFields) {
-        if (!formData[field as keyof typeof formData]) {
-          throw new Error(`${field.replace('_', ' ')} is required`);
-        }
-      }
-    } else {
-      const requiredFields = ['name', 'job_title', 'bio'];
-      for (const field of requiredFields) {
-        if (!formData[field as keyof typeof formData]) {
-          throw new Error(`${field.replace('_', ' ')} is required`);
-        }
-      }
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -149,17 +132,8 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
 
     try {
       validateFormData();
-
-      // Use id instead of team_id for existing members
       const memberId = 'id' in formData ? formData.id : formData.team_id;
-      const isExistingMember = Boolean(memberId);
 
-      // Construct the endpoint based on the API documentation
-      const endpoint = `https://api.seawolves.envorso.com/v1/teams/${teamId}/${
-        type === 'staff' ? 'staff' : 'roster'
-      }${isExistingMember ? `/${memberId}` : ''}`;
-
-      // Create request body based on member type
       const requestBody = isRosterMember(formData)
         ? {
             name: formData.name,
@@ -180,33 +154,17 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
             is_coach: formData.is_coach
           };
 
-      // Add debugging logs
-      console.log('Member ID:', memberId);
-      console.log('Request endpoint:', endpoint);
-      console.log('Request method:', isExistingMember ? 'PUT' : 'POST');
-      console.log('Request body:', requestBody);
-
-      const response = await fetch(endpoint, {
-        method: isExistingMember ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session?.user.token}`
-        },
-        body: JSON.stringify(requestBody)
+      const result = await upsertTeamMember({
+        teamId,
+        type,
+        memberId,
+        data: requestBody,
+        token: session?.user.token!
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message ||
-            `Failed to ${isExistingMember ? 'update' : 'add'} team member`
-        );
-      }
-
-      const result = await response.json();
       toast({
         title: 'Success',
-        description: isExistingMember
+        description: memberId
           ? 'Member updated successfully'
           : 'Member added successfully'
       });
@@ -281,15 +239,28 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
                 />
               )}
               <Input
-                id="portrait"
-                name="portrait"
+                id="portraitFile"
+                name="portraitFile"
                 type="file"
                 accept="image/*"
                 onChange={handleFileChange}
               />
+              <Label htmlFor="portraitUrl">Or Enter Image URL</Label>
+              <Input
+                id="portraitUrl"
+                name="portraitUrl"
+                type="url"
+                placeholder="Enter image URL"
+                value={formData.portrait || ''}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    portrait: e.target.value
+                  }))
+                }
+              />
             </div>
           </div>
-
           {/* Staff-specific fields */}
           {type === 'staff' && isStaffMember(formData) && (
             <>

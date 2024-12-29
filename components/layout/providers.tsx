@@ -5,6 +5,7 @@ import ThemeProvider from './ThemeToggle/theme-provider';
 import { SessionProvider } from 'next-auth/react';
 
 export default function Providers({
+  // @ts-ignore
   session,
   children
 }: {
@@ -12,6 +13,7 @@ export default function Providers({
   children: React.ReactNode;
 }) {
   return (
+    // @ts-ignore
     <SessionProvider session={session}>
       <ThemeProvider
         attribute="class"

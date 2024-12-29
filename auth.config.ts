@@ -26,17 +26,14 @@ const authConfig: NextAuthOptions = {
         }
 
         try {
-          const response = await fetch(
-            'https://api.seawolves.envorso.com/v1/login',
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: credentials.email,
-                password: credentials.password
-              })
-            }
-          );
+          const response = await fetch(`${process.env.NEXT_API_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password
+            })
+          });
 
           if (!response.ok) {
             console.error('Failed to authenticate user');

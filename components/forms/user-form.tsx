@@ -20,6 +20,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { useSession } from 'next-auth/react';
 
+const API_URL = process.env.NEXT_API_URL;
+const USERS_ENDPOINT = `${API_URL}/users`;
+const SIGNUP_ENDPOINT = `${API_URL}/signup`;
+
 export type Permission =
   | 'Administrator'
   | 'Live Commentary'
@@ -71,50 +75,38 @@ export const UserForm = ({ userId, initialData }: UserFormProps) => {
 
     try {
       if (userId) {
-        // Update existing user
         const currentPermissions = initialData?.permissions || [];
         const newPermissions = data.permissions;
 
-        // Permissions to add
         const permissionsToAdd = newPermissions.filter(
           (p) => !currentPermissions.includes(p as Permission)
         );
 
-        // Permissions to remove
         const permissionsToRemove = currentPermissions.filter(
           (p) => !newPermissions.includes(p)
         );
 
-        // Add new permissions
         for (const permission of permissionsToAdd) {
-          await fetch(
-            `https://api.seawolves.envorso.com/v1/users/${userId}/permissions`,
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${session.user.token}`
-              },
-              body: JSON.stringify({ permissionName: permission })
-            }
-          );
+          await fetch(`${USERS_ENDPOINT}/${userId}/permissions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${session.user.token}`
+            },
+            body: JSON.stringify({ permissionName: permission })
+          });
         }
 
-        // Remove permissions
         for (const permission of permissionsToRemove) {
-          await fetch(
-            `https://api.seawolves.envorso.com/v1/users/${userId}/permissions/${permission}`,
-            {
-              method: 'DELETE',
-              headers: {
-                Authorization: `Bearer ${session.user.token}`
-              }
+          await fetch(`${USERS_ENDPOINT}/${userId}/permissions/${permission}`, {
+            method: 'DELETE',
+            headers: {
+              Authorization: `Bearer ${session.user.token}`
             }
-          );
+          });
         }
       } else {
-        // Create new user
-        await fetch('https://api.seawolves.envorso.com/v1/signup', {
+        await fetch(SIGNUP_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -175,7 +167,7 @@ export const UserForm = ({ userId, initialData }: UserFormProps) => {
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
                     <Input
-                      disabled={!!userId} // Only disable in edit mode
+                      disabled={!!userId}
                       type="email"
                       placeholder="Enter email address"
                       {...field}

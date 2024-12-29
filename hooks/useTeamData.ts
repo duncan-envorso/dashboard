@@ -8,7 +8,7 @@ const fetcher = async (): Promise<CombinedTeamData> => {
   }
 
   const teamId = '034db172-942f-48b8-bc91-a0b3eb3a025f';
-  const baseUrl = 'https://api.seawolves.envorso.com/v1/teams';
+  const baseUrl = `${process.env.NEXT_API_URL}/teams`;
   const requestConfig = {
     headers: {
       'x-client-app-version': '2.0.17'

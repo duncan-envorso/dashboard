@@ -51,41 +51,36 @@ async function getUser(userId: string): Promise<User | null> {
   try {
     const session = await getServerSession(authConfig);
     const token = session?.user?.token;
-
     if (!token) {
       throw new Error('No authentication token available');
     }
 
-    const response = await fetch(
-      `https://api.seawolves.envorso.com/v1/teams/034db172-942f-48b8-bc91-a0b3eb3a025f/users`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        cache: 'no-store'
-      }
-    );
+    const API_URL = process.env.NEXT_API_URL;
+    const TEAM_ID = session.user.teamId;
+
+    const response = await fetch(`${API_URL}/teams/${TEAM_ID}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      cache: 'no-store'
+    });
 
     if (!response.ok) {
       throw new Error(`Failed to fetch users: ${response.statusText}`);
     }
 
     const data: ApiResponse = await response.json();
-
     if (!data.users || !Array.isArray(data.users)) {
       throw new Error('Invalid API response format');
     }
 
     const apiUser = data.users.find((u) => u.id === userId);
-
     if (!apiUser) {
       return null;
     }
 
-    // Filter and validate permissions
     const validPermissions = apiUser.permissions.filter(isValidPermission);
-
     return {
       id: apiUser.id,
       email: apiUser.email,
