@@ -230,15 +230,15 @@ export async function upsertTeamMember({
   data: any;
   token: string;
 }) {
-  const API_URL = `${process.env.NEXT_API_URL}`;
-
-  console.log('API_URL', API_URL);
+  if (!token) {
+    throw new Error('Authentication token is required');
+  }
 
   const endpoint = `${API_URL}/teams/${teamId}/${type}${
     memberId ? `/${memberId}` : ''
   }`;
 
-  console.log('endpoint', endpoint);
+  console.log(endpoint);
 
   const response = await fetch(endpoint, {
     method: memberId ? 'PUT' : 'POST',
@@ -249,7 +249,7 @@ export async function upsertTeamMember({
     body: JSON.stringify(data)
   });
 
-  console.log('response', response);
+  console.log(response);
 
   if (!response.ok) {
     const error = await response.json();
@@ -277,4 +277,39 @@ export async function uploadImage(file: FormData, token: string) {
   }
 
   return response.json();
+}
+
+export async function deleteMember({
+  teamId,
+  memberId,
+  type,
+  token
+}: {
+  teamId: string;
+  memberId: string;
+  type: 'staff' | 'roster';
+  token: string;
+}) {
+  if (!token) {
+    throw new Error('Authentication token is required');
+  }
+
+  console.log('memberId', memberId);
+
+  const API_URL = process.env.NEXT_API_URL;
+  const endpoint = `${API_URL}/teams/${teamId}/${type}/${memberId}`;
+
+  const response = await fetch(endpoint, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to delete team member');
+  }
+
+  return true;
 }

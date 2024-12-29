@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import {
   Dialog,
@@ -11,10 +12,11 @@ import {
   DialogTitle,
   DialogFooter
 } from '@/components/ui/dialog';
-
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { AddMemberDialog } from './AddMemberDialog';
@@ -23,9 +25,11 @@ import { useSession } from 'next-auth/react';
 import { CombinedTeamData, RosterMember, StaffMember } from '@/types/team';
 import EditTeamMemberForm from './EditTeamMemberForm';
 import { toast } from '../ui/use-toast';
+import { upsertTeamMember, deleteMember } from '@/app/actions'; // Import server actions
 
 interface TeamRosterDashboardProps {
   apiFormattedData: CombinedTeamData;
+  onMemberChange?: () => void; // Add callback for data updates
 }
 
 const positionGroups = {
@@ -35,8 +39,10 @@ const positionGroups = {
 };
 
 export default function TeamRosterDashboard({
-  apiFormattedData
+  apiFormattedData,
+  onMemberChange
 }: TeamRosterDashboardProps) {
+  const router = useRouter();
   const [editingMember, setEditingMember] = useState<
     RosterMember | StaffMember | null
   >(null);
@@ -47,10 +53,9 @@ export default function TeamRosterDashboard({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const teamId = currentTeamConfig.teamId;
   const { data: session } = useSession();
-
-  console.log(session);
 
   const handleAdd = () => {
     setIsAddDialogOpen(true);
@@ -68,48 +73,36 @@ export default function TeamRosterDashboard({
       return;
     }
 
-    const API_URL = process.env.NEXT_API_URL;
-    const endpoint =
-      'is_coach' in memberData
-        ? `${API_URL}/teams/${teamId}/staff`
-        : `${API_URL}/teams/${teamId}/roster`;
-
     try {
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.accessToken}`
-        },
-        body: JSON.stringify({
+      const type = 'is_coach' in memberData ? 'staff' : 'roster';
+      await upsertTeamMember({
+        teamId,
+        type,
+        data: {
           team_id: teamId,
           ...memberData
-        })
+        },
+        token: session.accessToken
       });
 
-      console.log(response);
+      setIsAddDialogOpen(false);
+      toast({
+        title: 'Success',
+        description: 'Member added successfully',
+        variant: 'default'
+      });
 
-      if (response.ok) {
-        setIsAddDialogOpen(false);
-        toast({
-          title: 'Success',
-          description: 'Member added successfully',
-          variant: 'default'
-        });
-      } else {
-        const errorData = await response.json();
-        console.log('Failed to add member:', errorData);
-        toast({
-          title: 'Error',
-          description: 'Failed to add member',
-          variant: 'destructive'
-        });
-      }
+      // Trigger both router refresh and callback
+      router.refresh();
+      onMemberChange?.();
     } catch (error) {
-      console.log('Error adding member:', error);
+      console.error('Error adding member:', error);
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred',
         variant: 'destructive'
       });
     }
@@ -117,38 +110,33 @@ export default function TeamRosterDashboard({
 
   const handleDelete = async () => {
     if (!session?.accessToken || !deletingMember) return;
-    const API_URL = process.env.NEXT_API_URL;
-    const endpoint = `${API_URL}/teams/${teamId}/${
-      'is_coach' in deletingMember ? 'staff' : 'roster'
-    }/${deletingMember.id}`;
 
     try {
-      const response = await fetch(endpoint, {
-        method: 'DELETE',
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`
-        }
+      // You'll need to add a deleteMember server action to your actions.ts file
+      await deleteMember({
+        teamId,
+        memberId: deletingMember.id as string,
+        type: 'is_coach' in deletingMember ? 'staff' : 'roster',
+        token: session.accessToken
       });
 
-      if (response.ok) {
-        setIsDeleteDialogOpen(false);
-        toast({
-          title: 'Success',
-          description: 'Member deleted successfully'
-        });
-        return;
-      }
-
+      setIsDeleteDialogOpen(false);
       toast({
-        title: 'Error',
-        description: 'Failed to delete member',
-        variant: 'destructive'
+        title: 'Success',
+        description: 'Member deleted successfully'
       });
+
+      // Trigger both router refresh and callback
+      router.refresh();
+      onMemberChange?.();
     } catch (error) {
       console.error('Error:', error);
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred',
+        description:
+          error instanceof Error
+            ? error.message
+            : 'An unexpected error occurred',
         variant: 'destructive'
       });
     }
@@ -157,15 +145,36 @@ export default function TeamRosterDashboard({
   const filteredMembers = useMemo(() => {
     const { roster = [], staff = [] } = apiFormattedData;
 
+    // First filter by tab
+    let filtered: any[] = [];
     switch (activeTab) {
       case 'all':
-        return [...roster, ...staff];
+        filtered = [...roster, ...staff];
+        break;
       case 'roster':
-        return roster;
+        filtered = roster;
+        break;
       case 'staff':
-        return staff;
+        filtered = staff;
+        break;
+      default:
+        filtered = [];
     }
-  }, [apiFormattedData, activeTab]);
+
+    // Then filter by search query if it exists
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return filtered.filter((member) => {
+        const name = member.name.toLowerCase();
+        const position = (
+          'position' in member ? member.position : member.job_title
+        ).toLowerCase();
+        return name.includes(query) || position.includes(query);
+      });
+    }
+
+    return filtered;
+  }, [apiFormattedData, activeTab, searchQuery]);
 
   const handleEdit = (member: RosterMember | StaffMember) => {
     setEditingMember(member);
@@ -247,6 +256,18 @@ export default function TeamRosterDashboard({
           />
         </div>
 
+        <div className="relative mb-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <Input
+              className="w-full pl-10 pr-4"
+              placeholder="Search by name or position..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="mb-4 flex space-x-2 bg-slate-100">
             {Object.entries(positionGroups).map(([id, name]) => (
@@ -271,8 +292,7 @@ export default function TeamRosterDashboard({
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
-          <DialogTitle className="hidden">Add Member</DialogTitle>
-
+          <DialogTitle className="hidden">Edit Member</DialogTitle>
           {editingMember && (
             <EditTeamMemberForm
               type={'position' in editingMember ? 'roster' : 'staff'}
@@ -280,6 +300,8 @@ export default function TeamRosterDashboard({
               teamId={teamId}
               onSuccess={() => {
                 setIsEditDialogOpen(false);
+                router.refresh();
+                onMemberChange?.();
               }}
             />
           )}
