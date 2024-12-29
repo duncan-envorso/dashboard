@@ -3,6 +3,13 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GithubProvider from 'next-auth/providers/github';
 import { jwtDecode } from 'jwt-decode';
 
+interface DecodedToken {
+  id: string;
+  teamId: string;
+  exp: number; // Expiration timestamp
+  iat: number; // Issued at timestamp
+}
+
 const authConfig: NextAuthOptions = {
   providers: [
     GithubProvider({
@@ -24,7 +31,6 @@ const authConfig: NextAuthOptions = {
           console.error('Missing email or password');
           return null;
         }
-
         try {
           const response = await fetch(`${process.env.NEXT_API_URL}/login`, {
             method: 'POST',
@@ -34,22 +40,19 @@ const authConfig: NextAuthOptions = {
               password: credentials.password
             })
           });
-
           if (!response.ok) {
             console.error('Failed to authenticate user');
             return null;
           }
-
           const { token } = await response.json();
-          const decodedToken = jwtDecode<{ id: string; teamId: string }>(token);
-
-          // Return the user object with token information
+          const decodedToken = jwtDecode<DecodedToken>(token);
           return {
             id: decodedToken.id,
             email: credentials.email,
             teamId: decodedToken.teamId,
-            team: 'seattle-seawolves', // Add a placeholder team name
-            token
+            team: 'seattle-seawolves',
+            token,
+            tokenExpires: decodedToken.exp * 1000 // Convert to milliseconds
           };
         } catch (error) {
           console.log('Error during authentication:', error);
@@ -59,20 +62,56 @@ const authConfig: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, trigger }: any) {
       if (user) {
-        // Store user details and accessToken in the JWT
+        // Initial sign in
         token.id = user.id;
         token.email = user.email;
         token.teamId = user.teamId;
         token.team = user.team;
-        token.accessToken = user.token; // Store accessToken in JWT token
+        token.accessToken = user.token;
+        token.tokenExpires = user.tokenExpires;
       }
-      return token; // Pass token forward
+
+      // Check if token is expired
+      const now = Date.now();
+      if (token.tokenExpires && now >= token.tokenExpires) {
+        try {
+          // Attempt to refresh the token
+          const response = await fetch(
+            `${process.env.NEXT_API_URL}/refresh-token`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token.accessToken}`
+              }
+            }
+          );
+
+          if (!response.ok) {
+            return { ...token, error: 'RefreshAccessTokenError' };
+          }
+
+          const { token: newToken } = await response.json();
+          const decodedToken = jwtDecode<DecodedToken>(newToken);
+
+          return {
+            ...token,
+            accessToken: newToken,
+            tokenExpires: decodedToken.exp * 1000,
+            error: undefined
+          };
+        } catch (error) {
+          console.error('Error refreshing token:', error);
+          return { ...token, error: 'RefreshAccessTokenError' };
+        }
+      }
+
+      return token;
     },
     async session({ session, token }: any) {
       if (token) {
-        // Store user details and accessToken in the session
         session.user = {
           ...session.user,
           id: token.id,
@@ -81,15 +120,33 @@ const authConfig: NextAuthOptions = {
           team: token.team,
           token: token.accessToken
         };
-        session.accessToken = token.accessToken; // Store accessToken in session
+        session.accessToken = token.accessToken;
+        session.error = token.error;
       }
-      return session; // Return updated session with the accessToken
+      return session;
     }
   },
   pages: {
     signIn: '/',
     signOut: '/auth/signout',
     error: '/auth/error'
+  },
+  events: {
+    async signOut({ session }) {
+      // Optionally invalidate the token on the server when user signs out
+      if (session?.accessToken) {
+        try {
+          await fetch(`${process.env.NEXT_API_URL}/logout`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`
+            }
+          });
+        } catch (error) {
+          console.error('Error during logout:', error);
+        }
+      }
+    }
   },
   debug: process.env.NODE_ENV === 'development'
 };

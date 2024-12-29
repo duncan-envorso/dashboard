@@ -1,4 +1,4 @@
-// layout.tsx
+// app/layout.tsx
 import Providers from '@/components/layout/providers';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
@@ -7,6 +7,7 @@ import { Inter } from 'next/font/google';
 import { getServerSession } from 'next-auth';
 import authConfig from '@/auth.config';
 import ThemeProvider from '@/components/ThemeProvider';
+import { TokenExpirationHandler } from '@/components/tokenExpirationHandler';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -27,8 +28,7 @@ export default async function RootLayout({
       <body className={inter.className}>
         <Providers session={session}>
           <ThemeProvider>
-            {children}
-
+            <TokenExpirationHandler>{children}</TokenExpirationHandler>
             <Toaster />
           </ThemeProvider>
         </Providers>
