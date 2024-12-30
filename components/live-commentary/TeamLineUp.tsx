@@ -8,9 +8,11 @@ interface TeamLineupProps {
 }
 
 export function TeamLineup({ team, isHomeTeam }: TeamLineupProps) {
-  const sortedLineup = [...team.lineUp].sort(
-    (a, b) => a.player_number - b.player_number
-  );
+  const sortedLineup = [...team.lineUp].sort((a, b) => {
+    const numA = Number(a.player_number) || 0;
+    const numB = Number(b.player_number) || 0;
+    return numA - numB;
+  });
 
   return (
     <div className="space-y-2">

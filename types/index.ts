@@ -35,7 +35,7 @@ export type SidebarNavItem = NavItemWithChildren;
 export interface MessageConfig {
   id: string;
   teamId?: string;
-  modalType: 'Modal' | 'Image' | 'Toast';
+  type: 'Modal' | 'Image' | 'Toast';
   textColor: string;
   title: string;
   body: string;
@@ -52,6 +52,16 @@ export interface MessageConfig {
   createdAt: string | number | Date;
   createdBy: string;
   updatedAt: string | number | Date;
+  image_url?: string; // Align with Notification
+  expiration_date?: string; // Align with Notification
+  button_text?: string; // Align with Notification
+  button_text_color?: string; // Align with Notification
+  button_background_color?: string; // Align with Notification
+  text_color?: string; // Align with Notification
+  background_color?: string; // Align with Notification
+  created_at?: string | number | Date; // Align with Notification
+  created_by?: string; // Align with Notification
+  updated_at?: string | number | Date; // Align with Notification
 }
 
 export type ModalSchedulingStatus =
@@ -62,27 +72,27 @@ export type ModalSchedulingStatus =
   | 'Canceled'
   | 'Deleted';
 
-export type Notification = {
-  status: string;
+export interface Notification {
   id: string;
-
-  type: 'Modal' | 'Toast' | 'Image';
+  type: 'Modal' | 'Image' | 'Toast';
   title: string;
   body: string;
-  image_url?: string;
-  button_text?: string;
-  button_text_color?: string;
-  button_background_color?: string;
+  image_url: string;
+  expiration_date: string;
+  button_text: string;
+  button_text_color: string;
+  button_background_color: string;
   text_color: string;
   background_color: string;
-  created_at: string;
+  topic?: string;
+  scheduled_date?: string;
+  scheduled_time?: string;
+  timezone?: string;
+  status: ModalSchedulingStatus;
+  created_at: string | number | Date;
   created_by: string;
-  sending_at?: string;
-  expires_at: string;
-  viewed_count?: string;
-  clicked_count?: string;
-  dismissed_count?: string;
-};
+  updated_at: string | number | Date;
+}
 
 export type Notifications = Notification[];
 
@@ -98,15 +108,6 @@ export interface Comment {
   text: string;
   isLiveFeed: boolean;
   timestamp?: number;
-}
-
-export interface MessageConfig {
-  title: string;
-  imageUrl: string;
-  buttonText: string;
-  textColor: string;
-  buttonBackground: string;
-  buttonTextColor: string;
 }
 
 export interface Referee {
@@ -156,4 +157,11 @@ export interface PastMatch {
   away_team_id: string;
   home_score: number;
   away_score: number;
+}
+
+export interface NotificationPayload {
+  title: string;
+  body: string;
+  topic: string;
+  key: string;
 }

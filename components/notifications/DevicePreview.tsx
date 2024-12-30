@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import { CheckCircle, X } from 'lucide-react';
 import Image from 'next/image';
 import { MessageConfig } from '@/types';
@@ -8,35 +8,63 @@ interface DevicePreviewProps {
   config: Partial<MessageConfig>;
 }
 
-export default function Component({ config }: DevicePreviewProps = { config: {} }) {
+export default function Component(
+  { config }: DevicePreviewProps = { config: {} }
+) {
   const ModalPreview = () => (
-    <div className="bg-white rounded-lg shadow-lg p-6 absolute inset-4 flex flex-col items-center">
-      <button className="self-end mb-2 text-gray-500 hover:text-gray-700 transition-colors">
+    <div className="absolute inset-4 flex flex-col items-center rounded-lg bg-white p-6 shadow-lg">
+      <button className="mb-2 self-end text-gray-500 transition-colors hover:text-gray-700">
         <X size={24} />
       </button>
-      <h3 className="text-xl font-bold mb-4" style={{ color: config.textColor }}>{config.title || 'Title'}</h3>
+      <h3
+        className="mb-4 text-xl font-bold"
+        style={{ color: config.textColor }}
+      >
+        {config.title || 'Title'}
+      </h3>
       {config.imageUrl && (
-        <div className="relative w-full h-40 mb-4">
-          <Image src={config.imageUrl} layout="fill" objectFit="cover" alt="Preview" className="rounded-lg" />
+        <div className="relative mb-4 h-40 w-full">
+          <Image
+            src={config.imageUrl}
+            layout="fill"
+            objectFit="cover"
+            alt="Preview"
+            className="rounded-lg"
+          />
         </div>
       )}
-      <p className="text-sm text-center mb-6" style={{ color: config.textColor }}>{config.body || 'Body text'}</p>
-      <Button 
-        className="w-full py-2 px-4 rounded-full transition-colors"
-        style={{ backgroundColor: config.buttonBackground, color: config.buttonTextColor }}
+      <p
+        className="mb-6 text-center text-sm"
+        style={{ color: config.textColor }}
+      >
+        {config.body || 'Body text'}
+      </p>
+      <Button
+        className="w-full rounded-full px-4 py-2 transition-colors"
+        style={{
+          backgroundColor: config.buttonBackground,
+          color: config.buttonTextColor
+        }}
       >
         {config.buttonText || 'Button'}
       </Button>
-      {config.topic && <p className="text-xs mt-4 text-gray-500">Topic: {config.topic}</p>}
+      {config.topic && (
+        <p className="mt-4 text-xs text-gray-500">Topic: {config.topic}</p>
+      )}
     </div>
   );
 
   const ImagePreview = () => (
-    <div className="absolute inset-0 rounded-2xl overflow-hidden">
+    <div className="absolute inset-0 overflow-hidden rounded-2xl">
       {config.imageUrl ? (
-        <Image src={config.imageUrl} layout="fill" objectFit="cover" alt="Preview" />
+        <Image
+          src={config.imageUrl}
+          layout="fill"
+          objectFit="cover"
+          alt="Preview"
+        />
       ) : (
-        <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
+        <div className="flex h-full w-full items-center justify-center bg-gray-200 text-gray-500">
           <span className="text-lg font-semibold">No image</span>
         </div>
       )}
@@ -44,19 +72,23 @@ export default function Component({ config }: DevicePreviewProps = { config: {} 
   );
 
   const ToastPreview = () => (
-    <div className="bg-white rounded-lg shadow-md p-4 absolute top-4 right-3 left-3 flex items-start border-l-4 border-green-500">
-      <CheckCircle className="w-5 h-5 text-green-500 mr-3 mt-1.5 flex-shrink-0" />
-      <div className="flex-grow pr-4 mt-1.5 overflow-hidden">
+    <div className="absolute left-3 right-3 top-4 flex items-start rounded-lg border-l-4 border-green-500 bg-white p-4 shadow-md">
+      <CheckCircle className="mr-3 mt-1.5 h-5 w-5 flex-shrink-0 text-green-500" />
+      <div className="mt-1.5 flex-grow overflow-hidden pr-4">
         {config.title ? (
-          <h3 className="text-xs text-primary text-gray-900 break-words">{config.title}</h3>
+          <h3 className="break-words text-xs text-gray-900 text-primary">
+            {config.title}
+          </h3>
         ) : (
-          <p className="text-xs text-gray-600 break-words">{config.body || 'Notification message'}</p>
+          <p className="break-words text-xs text-gray-600">
+            {config.body || 'Notification message'}
+          </p>
         )}
       </div>
-      <Button 
+      <Button
         variant="ghost"
         size="icon"
-        className="shrink-0 -mt-1 -mr-2 text-gray-400 hover:text-gray-600"
+        className="-mr-2 -mt-1 shrink-0 text-gray-400 hover:text-gray-600"
         aria-label="Close"
       >
         <X className="h-4 w-4" />
@@ -65,7 +97,7 @@ export default function Component({ config }: DevicePreviewProps = { config: {} 
   );
 
   const PreviewContent = () => {
-    switch (config.modalType) {
+    switch (config.type) {
       case 'Modal':
         return <ModalPreview />;
       case 'Image':
@@ -73,19 +105,23 @@ export default function Component({ config }: DevicePreviewProps = { config: {} 
       case 'Toast':
         return <ToastPreview />;
       default:
-        return <div className="text-center p-4 text-gray-500">Please select a layout type</div>;
+        return (
+          <div className="p-4 text-center text-gray-500">
+            Please select a layout type
+          </div>
+        );
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-6 text-center">Mobile Preview</h2>
-      <div className="w-[320px] h-[640px] mx-auto bg-gray-100 border-[14px] border-gray-900 rounded-[3rem] p-3 relative shadow-xl">
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-gray-900 rounded-b-xl"></div>
-        <div className="w-full h-full bg-white rounded-[2rem] overflow-hidden relative">
+    <div className="mx-auto w-full max-w-md">
+      <h2 className="mb-6 text-center text-2xl font-bold">Mobile Preview</h2>
+      <div className="relative mx-auto h-[640px] w-[320px] rounded-[3rem] border-[14px] border-gray-900 bg-gray-100 p-3 shadow-xl">
+        <div className="absolute left-1/2 top-0 h-6 w-1/3 -translate-x-1/2 transform rounded-b-xl bg-gray-900"></div>
+        <div className="relative h-full w-full overflow-hidden rounded-[2rem] bg-white">
           <PreviewContent />
         </div>
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-1/3 h-1 bg-gray-900 rounded-full"></div>
+        <div className="absolute bottom-4 left-1/2 h-1 w-1/3 -translate-x-1/2 transform rounded-full bg-gray-900"></div>
       </div>
     </div>
   );

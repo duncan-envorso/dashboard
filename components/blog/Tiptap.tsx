@@ -1,4 +1,6 @@
-import React, { useState, useCallback, useEffect } from 'react';
+'use client';
+
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
@@ -11,94 +13,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Save, Eye, Upload, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import TitleInput from './TitleInput';
 import FeaturedImageUpload from './FeaturedImageUpload';
 import ContentEditor from './ContentEditor';
 import PreviewContent from './PreviewContent';
-import {
-  Article,
-  ArticleType,
-  CreateArticleResponse
-} from '@/types/newsarticle';
+import { Article, ArticleType } from '@/types/newsarticle';
+import { createOrUpdateArticle } from '@/app/actions';
+import { MetaFields } from './metafields';
 
 interface BlogEditorProps {
   post?: Article;
   goBack: () => void;
   teamId: string;
-  onDraftChange?: (hasDraft: boolean) => void;
-  token: string;
 }
 
-const MetaFields: React.FC<{
-  metaDescription: string;
-  setMetaDescription: (value: string) => void;
-  metaTags: string[];
-  setMetaTags: (tags: string[]) => void;
-}> = ({ metaDescription, setMetaDescription, metaTags, setMetaTags }) => {
-  const [tagInput, setTagInput] = useState('');
-
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      setMetaTags([...metaTags, tagInput.trim()]);
-      setTagInput('');
-    }
-  };
-
-  const removeTag = (indexToRemove: number) => {
-    setMetaTags(metaTags.filter((_, index) => index !== indexToRemove));
-  };
-
-  return (
-    <div className="space-y-4">
-      <div>
-        <label className="text-sm font-medium">Meta Description</label>
-        <Textarea
-          value={metaDescription}
-          onChange={(e) => setMetaDescription(e.target.value)}
-          placeholder="Enter meta description for SEO"
-          className="mt-1"
-        />
-      </div>
-      <div>
-        <label className="text-sm font-medium">Meta Tags</label>
-        <Input
-          value={tagInput}
-          onChange={(e) => setTagInput(e.target.value)}
-          onKeyDown={handleAddTag}
-          placeholder="Type tag and press Enter"
-          className="mt-1"
-        />
-        <div className="mt-2 flex flex-wrap gap-2">
-          {metaTags.map((tag, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-sm"
-            >
-              {tag}
-              <button
-                onClick={() => removeTag(index)}
-                className="ml-1 text-gray-500 hover:text-gray-700"
-              >
-                ×
-              </button>
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const API_BASE_URL = `${process.env.NEXT_API_URL}`;
-
-const BlogEditor: React.FC<BlogEditorProps> = ({
-  post,
-  goBack,
-  teamId,
-  token
-}) => {
+const BlogEditor: React.FC<BlogEditorProps> = ({ post, goBack, teamId }) => {
   const [title, setTitle] = useState(post?.title || '');
   const [image, setImage] = useState(post?.image || '');
   const [type, setType] = useState<ArticleType>(post?.type || 'news');
@@ -111,6 +40,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
   const [metaTags, setMetaTags] = useState<string[]>(
     post?.meta_tags ? JSON.parse(post?.meta_tags) : []
   );
+
   const router = useRouter();
   const { toast } = useToast();
 
@@ -158,11 +88,8 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
     }
 
     setIsSaving(true);
-    const articleData: Partial<Article> & {
-      team_id: string;
-      title: string;
-      text: string;
-    } = {
+
+    const articleData = {
       team_id: teamId,
       title: title.trim(),
       text: editor.getHTML(),
@@ -170,31 +97,20 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       type,
       status: isDraft ? 'draft' : 'published',
       date_posted: post?.date_posted || new Date().toISOString(),
-      guid: post?.guid || crypto.randomUUID()
+      guid: post?.guid || crypto.randomUUID(),
+      meta_description: metaDescription,
+      meta_tags: JSON.stringify(metaTags)
     };
-
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/articles${post?.id ? `/${post.id}` : ''}`,
-        {
-          method: post?.id ? 'PUT' : 'POST',
-          headers: {
-            accept: 'application/json',
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify(articleData)
-        }
+      const result = await createOrUpdateArticle(
+        articleData,
+        post?.id?.toString()
       );
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(
-          errorData?.message || `HTTP error! status: ${response.status}`
-        );
+      if (!result.success) {
+        throw new Error(result.error as string);
       }
 
-      const data: CreateArticleResponse = await response.json();
       localStorage.removeItem('articleDraft');
 
       toast({
@@ -207,25 +123,19 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
       });
 
       router.push('/dashboard/news-articles');
+      router.refresh();
     } catch (error) {
       console.error('Error saving article:', error);
-      let errorMessage = 'Failed to save the article. Please try again.';
-
-      if (error instanceof Error) {
-        if (error.message.includes('413')) {
-          errorMessage =
-            'Article content is too large. Please reduce the size or remove some images.';
-        } else if (error.message.includes('401')) {
-          errorMessage = 'Your session has expired. Please log in again.';
-          router.push('/auth/login');
-        }
-      }
-
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: errorMessage
+        description:
+          error instanceof Error ? error.message : 'Failed to save the article'
       });
+
+      if (error instanceof Error && error.message.includes('401')) {
+        router.push('/auth/login');
+      }
     } finally {
       setIsSaving(false);
     }
@@ -261,14 +171,14 @@ const BlogEditor: React.FC<BlogEditorProps> = ({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={(e: React.MouseEvent) => handleSubmit(true)}
+                onClick={() => handleSubmit(true)}
                 className="transition-colors duration-200 hover:bg-primary/10"
               >
                 <Save className="mr-2 h-4 w-4" />
                 Save Draft
               </Button>
               <Button
-                onClick={(e: React.MouseEvent) => handleSubmit(false)}
+                onClick={() => handleSubmit(false)}
                 className="bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90"
                 disabled={isSaving}
               >

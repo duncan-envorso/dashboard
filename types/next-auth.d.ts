@@ -4,29 +4,16 @@ declare module 'next-auth' {
   interface User extends DefaultUser {
     team?: string;
     teamId?: string;
-    token?: string;
-    tokenExpires?: number; // Add token expiration timestamp
+    token?: string; // Adding token property to the user
   }
 
   interface Session extends DefaultSession {
-    user: User & DefaultSession['user'];
-    accessToken?: string;
-    error?: 'RefreshAccessTokenError' | string; // Add error property
+    user: User & DefaultSession['user']; // Extending user to include token and other details
+    accessToken?: string; // Adding accessToken to the session
   }
 
   interface CredentialsInputs {
     email: string;
     password: string;
-  }
-
-  // Optionally, if you want to type the JWT payload
-  interface JWT {
-    id?: string;
-    email?: string;
-    teamId?: string;
-    team?: string;
-    accessToken?: string;
-    tokenExpires?: number;
-    error?: 'RefreshAccessTokenError' | string;
   }
 }

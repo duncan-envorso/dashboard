@@ -9,6 +9,8 @@ import React, {
   ReactNode
 } from 'react';
 import { useSession } from 'next-auth/react';
+import { customFetch } from '@/lib/customFetch';
+import moment from 'moment';
 
 interface NotificationsContextType {
   notifications: Notification[];
@@ -20,7 +22,7 @@ interface NotificationsContextType {
     updatedNotification: Partial<Notification>
   ) => Promise<void>;
   deleteNotification: (id: string) => Promise<void>;
-  sendNotification: (id: string) => Promise<void>;
+  sendNotification: (notification: Omit<Notification, 'id'>) => Promise<void>;
   refreshNotifications: () => Promise<void>;
   getNotification: (id: string) => Promise<Notification>;
 }
@@ -61,30 +63,22 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
     await fetchNotifications();
   };
 
-  const API_URL = process.env.NEXT_API_URL;
-  const NOTIFICATIONS_ENDPOINT = `${API_URL}/panel/in-app-modal`;
-
   const fetchNotifications = async () => {
     if (!session?.user?.teamId) {
       setError('No team ID available');
       setLoading(false);
       return;
     }
+
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(
-        `${NOTIFICATIONS_ENDPOINT}/${session.user.teamId}`,
+      const data = await customFetch(
+        `/panel/in-app-modal/${session.user.teamId}`,
         {
-          headers: {
-            Authorization: `Bearer ${session.user.token}`
-          }
+          cache: 'no-store' // Don't cache notifications list to ensure fresh data
         }
       );
-      if (!response.ok) {
-        throw new Error('Failed to fetch notifications');
-      }
-      const data: Notification[] = await response.json();
       setNotifications(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -97,32 +91,22 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
     if (!session?.user?.teamId) {
       throw new Error('No team ID available');
     }
+
     try {
-      const response = await fetch(NOTIFICATIONS_ENDPOINT, {
+      const newNotification = await customFetch('/panel/in-app-modal', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.user.token}`
-        },
+        cache: 'no-store',
         body: JSON.stringify({ ...notification, teamId: session.user.teamId })
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Failed to add notification: ${
-            errorData.message || response.statusText
-          }`
-        );
-      }
-      const newNotification: Notification = await response.json();
+
       setNotifications((prev) => [...prev, newNotification]);
     } catch (err) {
-      console.error('Error in addNotification:', err);
-      setError(
+      const errorMsg =
         err instanceof Error
           ? err.message
-          : 'An error occurred while adding notification'
-      );
+          : 'An error occurred while adding notification';
+      console.error('Error in addNotification:', errorMsg);
+      setError(errorMsg);
       throw err;
     }
   };
@@ -136,38 +120,25 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
     }
 
     try {
-      const url = `${NOTIFICATIONS_ENDPOINT}/${session.user.teamId}/${modalId}`;
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.user.token}`
-        },
-        body: JSON.stringify(updatedNotification)
-      });
+      const updated = await customFetch(
+        `/panel/in-app-modal/${session.user.teamId}/${modalId}`,
+        {
+          method: 'PUT',
+          cache: 'no-store',
+          body: JSON.stringify(updatedNotification)
+        }
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('API Error Response:', errorData);
-        throw new Error(
-          `Failed to update notification: ${
-            errorData.message || response.statusText
-          }`
-        );
-      }
-
-      const updated: Notification = await response.json();
       setNotifications((prev) =>
         prev.map((notif) => (notif.id === modalId ? updated : notif))
       );
-      await refreshNotifications();
     } catch (err) {
-      console.error('Error in updateNotification:', err);
-      setError(
+      const errorMsg =
         err instanceof Error
           ? err.message
-          : 'An error occurred while updating notification'
-      );
+          : 'An error occurred while updating notification';
+      console.error('Error in updateNotification:', errorMsg);
+      setError(errorMsg);
       throw err;
     }
   };
@@ -178,25 +149,11 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
     }
 
     try {
-      const response = await fetch(
-        `${NOTIFICATIONS_ENDPOINT}/${id}?teamId=${session.user.teamId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${session.user.token}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Failed to fetch notification: ${
-            errorData.message || response.statusText
-          }`
-        );
-      }
-
-      return await response.json();
+      return await customFetch(`/panel/in-app-modal/${id}`, {
+        cache: 'force-cache', // Cache individual notification details
+        revalidate: 60, // Revalidate every minute
+        teamId: session.user.teamId
+      });
     } catch (err) {
       console.error('Error fetching notification:', err);
       throw err;
@@ -209,73 +166,83 @@ export const NotificationsProvider: React.FC<NotificationsProviderProps> = ({
     }
 
     try {
-      const response = await fetch(
-        `${NOTIFICATIONS_ENDPOINT}/${id}?teamId=${session.user.teamId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${session.user.token}`
-          }
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Failed to delete notification: ${
-            errorData.message || response.statusText
-          }`
-        );
-      }
+      await customFetch(`/panel/in-app-modal/${id}`, {
+        method: 'DELETE',
+        cache: 'no-store',
+        teamId: session.user.teamId
+      });
 
       setNotifications((prev) => prev.filter((notif) => notif.id !== id));
     } catch (err) {
-      console.error('Error in deleteNotification:', err);
-      setError(
+      const errorMsg =
         err instanceof Error
           ? err.message
-          : 'An error occurred while deleting notification'
-      );
+          : 'An error occurred while deleting notification';
+      console.error('Error in deleteNotification:', errorMsg);
+      setError(errorMsg);
       throw err;
     }
   };
 
-  const sendNotification = async (id: string) => {
+  const sendNotification = async (notification: Omit<Notification, 'id'>) => {
     if (!session?.user?.teamId) {
       throw new Error('No team ID available');
     }
 
     try {
-      const response = await fetch(
-        `${NOTIFICATIONS_ENDPOINT}/${id}/send?teamId=${session.user.teamId}`,
+      const scheduledDateTime = moment
+        .tz(
+          `${notification.scheduled_date?.split('T')[0]}T${
+            notification.scheduled_time
+          }`,
+          notification.timezone || 'UTC'
+        )
+        .toISOString();
+
+      const response = await customFetch(
+        `/panel/in-app-modal/${session.user.teamId}`,
         {
           method: 'POST',
+          cache: 'no-store',
           headers: {
-            Authorization: `Bearer ${session.user.token}`
-          }
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session?.user.token}`
+          },
+          body: JSON.stringify({
+            teamId: session.user.teamId,
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            image_url: notification.image_url,
+            expiration_date: scheduledDateTime, // Changed key to expiration_date
+            button_text: notification.button_text,
+            button_text_color: notification.button_text_color,
+            button_background_color: notification.button_background_color,
+            text_color: notification.text_color,
+            background_color: notification.background_color,
+            status: 'Scheduled'
+          })
         }
       );
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorText = await response.text();
         throw new Error(
-          `Failed to send notification: ${
-            errorData.message || response.statusText
-          }`
+          `Failed to send in-app modal: ${response.status} ${response.statusText}. ${errorText}`
         );
       }
 
-      const updatedNotification: Notification = await response.json();
-      setNotifications((prev) =>
-        prev.map((notif) => (notif.id === id ? updatedNotification : notif))
-      );
+      const result = await response.json();
+      console.log('In-app modal scheduled successfully:', result);
+      setNotifications((prev) => [...prev, result]);
+      return result;
     } catch (err) {
-      console.error('Error in sendNotification:', err);
-      setError(
+      const errorMsg =
         err instanceof Error
           ? err.message
-          : 'An error occurred while sending notification'
-      );
+          : 'An error occurred while sending notification';
+      console.log('Error in sendNotification:', errorMsg);
+      setError(errorMsg);
       throw err;
     }
   };

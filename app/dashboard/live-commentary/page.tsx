@@ -7,7 +7,7 @@ import LiveCommentaryLayout from '@/components/live-commentary/LiveCommentaryLay
 
 export default async function LiveCommentaryPage() {
   const matchData = await getMatchData('fcb64700-5989-4228-bee1-09c7e61a8d2c');
-
+  console.log('matchData', matchData, 'matchData');
   return (
     <CommentProvider>
       <DeviceProvider>

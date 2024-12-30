@@ -98,13 +98,13 @@ export function PlayerCard({ player, teamName, isHomeTeam }: PlayerCardProps) {
                     <dt className="text-muted-foreground">Position</dt>
                     <dd>{player.position}</dd>
                   </div>
-                  {player.height > 0 && (
+                  {player.height && player.height > 0 && (
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">Height</dt>
                       <dd>{player.height}cm</dd>
                     </div>
                   )}
-                  {player.weight > 0 && (
+                  {player.weight && player.weight > 0 && (
                     <div className="flex justify-between">
                       <dt className="text-muted-foreground">Weight</dt>
                       <dd>{player.weight}kg</dd>

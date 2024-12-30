@@ -3,10 +3,19 @@ import { currentTeamConfig } from '@/teamConfig';
 import { notFound } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import authConfig from '@/auth.config';
-import { MatchData } from '@/types/match';
 import { CombinedTeamData } from '@/types/team';
-import { Article } from '@/types/newsarticle';
+import {
+  Article,
+  ArticleListResponse,
+  CreateArticleResponse
+} from '@/types/newsarticle';
 import { authOptions } from '@/auth';
+import { cache } from 'react';
+import { customFetch } from '@/lib/customFetch';
+import { MatchData } from '@/types/schedule';
+import { revalidatePath } from 'next/cache';
+import { NotificationPayload } from '@/types';
+import { LiveMatchData } from '@/types/match';
 
 const API_URL = process.env.NEXT_API_URL;
 if (!API_URL) {
@@ -132,7 +141,7 @@ export async function fetchTeamData(): Promise<CombinedTeamData> {
   }
 }
 
-export async function getMatchData(matchId: string): Promise<MatchData> {
+export async function getMatchData(matchId: string): Promise<LiveMatchData> {
   try {
     const response = await fetch(
       `${API_URL}/matches/${matchId}?responseType=preview`,
@@ -146,7 +155,7 @@ export async function getMatchData(matchId: string): Promise<MatchData> {
     }
 
     const data = await response.json();
-    return data as MatchData;
+    return data as LiveMatchData;
   } catch (error) {
     console.log('Error fetching match data:', error);
     throw error;
@@ -289,4 +298,119 @@ export async function deleteMember({
   }
 
   return true;
+}
+
+export const getMatches = cache(async () => {
+  try {
+    const data: MatchData = await customFetch('matches', {
+      tags: ['matches'],
+      revalidate: 60 // Revalidate every minute
+    });
+
+    return {
+      matches: [...data.upcomingMatchesData, ...data.pastMatchesData].sort(
+        (a, b) =>
+          new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+      ),
+      error: null
+    };
+  } catch (error) {
+    console.error('Failed to fetch matches:', error);
+    return {
+      matches: [],
+      error: 'Failed to load matches. Please try again later.'
+    };
+  }
+});
+
+export async function updateMatchTicketUrl(
+  matchId: string,
+  ticketsUrl: string
+) {
+  try {
+    await customFetch(`matches/${matchId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ ticketsUrl }),
+      tags: ['matches'] // Add tag for revalidation
+    });
+    return { success: true, error: null };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Unknown error occurred';
+    return { success: false, error: message };
+  }
+}
+
+export async function createOrUpdateArticle(
+  articleData: Partial<ArticleListResponse> & {
+    team_id: string;
+    title: string;
+    text: string;
+  },
+  articleId?: string
+) {
+  try {
+    const endpoint = articleId ? `articles/${articleId}` : 'articles';
+    const method = articleId ? 'PUT' : 'POST';
+
+    const response = await customFetch(endpoint, {
+      method,
+      body: JSON.stringify(articleData),
+      tags: ['articles']
+    });
+
+    revalidatePath('/dashboard/news-articles');
+
+    return {
+      success: true,
+      data: response as CreateArticleResponse,
+      error: null
+    };
+  } catch (error) {
+    let errorMessage = 'Failed to save the article. Please try again.';
+
+    if (error instanceof Error) {
+      if (error.message.includes('413')) {
+        errorMessage =
+          'Article content is too large. Please reduce the size or remove some images.';
+      } else if (error.message.includes('401')) {
+        errorMessage = 'Your session has expired. Please log in again.';
+      }
+    }
+
+    return {
+      success: false,
+      data: null,
+      error: errorMessage
+    };
+  }
+}
+
+export async function sendNotification(
+  payload: NotificationPayload,
+  teamId: string
+) {
+  try {
+    const response = await customFetch(`panel/notifications?teamId=${teamId}`, {
+      method: 'POST',
+      body: JSON.stringify({
+        ...payload,
+        key: 'ENVORSO_HAS_THE_HIGHEST_SECURITY_KEY_EVER_$123&&'
+      })
+    });
+
+    return {
+      success: true,
+      data: response,
+      error: null
+    };
+  } catch (error) {
+    console.error('Error sending notification:', error);
+    return {
+      success: false,
+      data: null,
+      error:
+        error instanceof Error ? error.message : 'Failed to send notification'
+    };
+  }
 }

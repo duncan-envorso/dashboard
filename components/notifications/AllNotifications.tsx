@@ -58,8 +58,8 @@ const columns: ColumnDef<Notification>[] = [
     header: 'Expires at',
     cell: ({ row }) => (
       <span suppressHydrationWarning>
-        {row.original.expires_at
-          ? new Date(row.original.expires_at).toLocaleString()
+        {row.original.expiration_date
+          ? new Date(row.original.expiration_date).toLocaleString()
           : 'N/A'}
       </span>
     )

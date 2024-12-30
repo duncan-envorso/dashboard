@@ -15,13 +15,13 @@ import { Match } from '@/types/schedule';
 import { Check, Copy, ExternalLink, Loader2, X } from 'lucide-react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { updateMatchTicketUrl } from '@/app/actions';
 
 interface TicketManagementProps {
   match: Match;
-  onUpdate: (matchId: string, ticketsUrl: string) => Promise<void>;
 }
 
-const TicketManagement = ({ match, onUpdate }: TicketManagementProps) => {
+export function TicketManagement({ match }: TicketManagementProps) {
   const [ticketsUrl, setTicketsUrl] = useState(match.tickets_url || '');
   const [isLoading, setIsLoading] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -78,7 +78,12 @@ const TicketManagement = ({ match, onUpdate }: TicketManagementProps) => {
 
     try {
       setIsLoading(true);
-      await onUpdate(match.match_id, ticketsUrl);
+      const result = await updateMatchTicketUrl(match.match_id, ticketsUrl);
+
+      if (!result.success) {
+        throw new Error(result.error as string);
+      }
+
       toast({
         title: 'Success',
         description: `Ticket URL updated for ${match.name}`,
@@ -239,6 +244,4 @@ const TicketManagement = ({ match, onUpdate }: TicketManagementProps) => {
       </Card>
     </TooltipProvider>
   );
-};
-
-export default TicketManagement;
+}

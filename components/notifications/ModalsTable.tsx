@@ -7,7 +7,6 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from '../ui/use-toast';
 import ModalComponent from './ModalComponent';
-import NotificationComponent from './NotificationComponent';
 import { MessageConfig } from '@/types';
 import { Button } from '@/components/ui/button';
 import NotificationsCard from './AllNotifications';
@@ -22,6 +21,7 @@ import { useState } from 'react';
 import NotificationConfig from './ModalComponent';
 import { useSession } from 'next-auth/react';
 import NotificationsTable from './NotifcationsTable';
+import { NotificationComponent } from './NotificationComponent';
 
 const ModalsTable: React.FC = () => {
   const { data: session, status } = useSession();
@@ -73,7 +73,7 @@ const ModalsTable: React.FC = () => {
       const notificationToSave = {
         ...updatedNotification,
         status: 'Draft',
-        modalType: updatedNotification.modalType as MessageConfig['modalType'],
+        type: updatedNotification.type as MessageConfig['type'],
         expirationDate:
           updatedNotification.expirationDate || new Date().toISOString(),
         scheduledDate: null,

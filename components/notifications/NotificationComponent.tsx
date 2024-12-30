@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
-import { toast } from '@/components/ui/use-toast';
-import { useSession } from 'next-auth/react';
+import { useToast } from '@/components/ui/use-toast';
+import { sendNotification } from '@/app/actions';
 
 interface NotificationConfig {
   title: string;
@@ -18,9 +18,7 @@ interface NotificationConfig {
   teamId: string;
 }
 
-export default function NotificationComponent() {
-  const { data: session, status } = useSession();
-
+export function NotificationComponent() {
   const [config, setConfig] = useState<NotificationConfig>({
     title: '',
     body: '',
@@ -28,6 +26,7 @@ export default function NotificationComponent() {
     teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f'
   });
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -37,52 +36,50 @@ export default function NotificationComponent() {
   };
 
   const handleSave = async () => {
+    if (!config.title || !config.body) {
+      toast({
+        title: 'Validation Error',
+        description: 'Please fill in both title and body fields',
+        variant: 'destructive'
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      const apiKey = process.env.NEXT_PUBLIC_NOTIFICATION_KEY;
-      console.log('API Key:', process.env.NEXT_PUBLIC_NOTIFICATION_KEY);
-
-      if (!apiKey) {
-        throw new Error('API key is not set');
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_API_URL}/panel/notifications?teamId=034db172-942f-48b8-bc91-a0b3eb3a025f`,
+      const result = await sendNotification(
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session?.user.token}` // Add the Bearer
-          },
-          body: JSON.stringify({
-            title: config.title,
-            body: config.body,
-            topic: config.topic,
-            key: 'ENVORSO_HAS_THE_HIGHEST_SECURITY_KEY_EVER_$123&&'
-          })
-        }
+          title: config.title,
+          body: config.body,
+          topic: config.topic,
+          key: 'ENVORSO_HAS_THE_HIGHEST_SECURITY_KEY_EVER_$123&&'
+        },
+        config.teamId
       );
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Failed to send notification: ${response.status} ${response.statusText}. ${errorText}`
-        );
+      if (!result.success) {
+        throw new Error(result.error as string);
       }
 
-      const result = await response.json();
-      console.log('Notification sent:', result);
       toast({
         title: 'Success',
         description: 'Notification sent successfully'
       });
+
+      // Clear the form after successful submission
+      setConfig((prev) => ({
+        ...prev,
+        title: '',
+        body: ''
+      }));
     } catch (error) {
       console.error('Error sending notification:', error);
       toast({
         title: 'Error',
-        description: `Failed to send notification. Please try again. ${
-          error instanceof Error ? error.message : String(error)
-        }`,
+        description:
+          error instanceof Error
+            ? error.message
+            : 'Failed to send notification',
         variant: 'destructive'
       });
     } finally {

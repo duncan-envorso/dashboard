@@ -38,7 +38,7 @@ interface NotificationsComponentProps {
 }
 
 const defaultConfig: MessageConfig = {
-  modalType: 'Modal',
+  type: 'Modal',
   teamId: '034db172-942f-48b8-bc91-a0b3eb3a025f',
   textColor: '#000000',
   title: 'Major League Rugby Back of the Year 2024',
@@ -177,7 +177,7 @@ export default function NotificationConfig({
           },
           body: JSON.stringify({
             teamId: localConfig.teamId,
-            modalType: localConfig.modalType,
+            type: localConfig.type,
             expirationDate: localConfig.expirationDate,
             title: localConfig.title,
             image_url: localConfig.imageUrl,
@@ -221,9 +221,9 @@ export default function NotificationConfig({
           <div>
             <Label className="text-foreground">Layout</Label>
             <RadioGroup
-              value={localConfig.modalType}
+              value={localConfig.type}
               onValueChange={(value) =>
-                updateConfig('modalType', value as 'Modal' | 'Image' | 'Toast')
+                updateConfig('type', value as 'Modal' | 'Image' | 'Toast')
               }
               className="flex space-x-4"
             >
@@ -263,7 +263,7 @@ export default function NotificationConfig({
             </p>
           </div>
 
-          {localConfig.modalType === 'Modal' && (
+          {localConfig.type === 'Modal' && (
             <div>
               <Label htmlFor="body" className="text-foreground">
                 Body (max 200 characters)
@@ -282,8 +282,7 @@ export default function NotificationConfig({
             </div>
           )}
 
-          {(localConfig.modalType === 'Image' ||
-            localConfig.modalType === 'Modal') && (
+          {(localConfig.type === 'Image' || localConfig.type === 'Modal') && (
             <div>
               <Label htmlFor="imageUrl" className="text-foreground">
                 Image URL
@@ -297,7 +296,7 @@ export default function NotificationConfig({
             </div>
           )}
 
-          {localConfig.modalType === 'Modal' && (
+          {localConfig.type === 'Modal' && (
             <div>
               <Label htmlFor="buttonText" className="text-foreground">
                 Button Text

@@ -70,12 +70,7 @@ export default function NewPostPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <BlogEditor
-        goBack={handleGoBack}
-        teamId={teamId}
-        token={token ?? ''}
-        onDraftChange={(hasDraft) => setHasUnsavedChanges(hasDraft)}
-      />
+      <BlogEditor goBack={handleGoBack} teamId={teamId} />
 
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>

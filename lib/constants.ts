@@ -4,7 +4,7 @@ import { MessageConfig } from '@/types';
 // /lib/constants.ts
 // /lib/constants.ts
 export const initialConfig: MessageConfig = {
-  modalType: 'Modal',
+  type: 'Modal',
   title: 'Live Rugby Match',
   id: '', // Add the missing id property
   body: '', // Add the missing body property

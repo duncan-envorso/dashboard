@@ -15,8 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Loader2 } from 'lucide-react';
 import type { Article } from '@/types/newsarticle';
-
-const API_BASE_URL = `${process.env.NEXT_API_URL}`;
+import { customFetch } from '@/lib/customFetch';
 
 export default function EditPostPage() {
   const router = useRouter();
@@ -31,25 +30,16 @@ export default function EditPostPage() {
 
   useEffect(() => {
     async function fetchArticle() {
-      if (!params.id || !token) {
+      if (!params.id) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/articles/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const response = await customFetch(`/articles/${params.id}`);
+        console.log('response', response);
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        setArticle(data);
+        setArticle(response);
       } catch (error) {
         console.error('Error fetching article:', error);
       } finally {
@@ -59,7 +49,6 @@ export default function EditPostPage() {
 
     fetchArticle();
   }, [params.id, token]);
-
   const handleGoBack = () => setIsAlertOpen(true);
   const handleConfirmGoBack = () => {
     setIsAlertOpen(false);
@@ -76,12 +65,7 @@ export default function EditPostPage() {
 
   return (
     <div className="">
-      <BlogEditor
-        post={article}
-        goBack={handleGoBack}
-        teamId={teamId || ' '}
-        token={token ?? ''}
-      />
+      <BlogEditor post={article} goBack={handleGoBack} teamId={teamId || ' '} />
       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
