@@ -61,7 +61,8 @@ export default function BlogPostList({ initialPosts = [] }: Props) {
           </div>
           <Link href="/dashboard/news-articles/new">
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-              <Plus className="mr-2 h-4 w-4" /> Create Article
+              <Plus className="mr-2 h-4 w-4" />
+              Create Article
             </Button>
           </Link>
         </div>
@@ -71,6 +72,7 @@ export default function BlogPostList({ initialPosts = [] }: Props) {
               <TableRow>
                 <TableHead className="text-bold w-[40%] pl-4">Title</TableHead>
                 <TableHead className="pl-4">Type</TableHead>
+                <TableHead className="pl-4">Status</TableHead>
                 <TableHead className="pl-4">Date Posted</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -90,6 +92,7 @@ export default function BlogPostList({ initialPosts = [] }: Props) {
                       {post.type.replace('_', ' ')}
                     </Badge>
                   </TableCell>
+                  <TableCell className="pl-4">{post.status}</TableCell>
                   <TableCell className="pl-4">
                     {post.date_formatted
                       ? new Date(post.date_formatted).toLocaleDateString()
