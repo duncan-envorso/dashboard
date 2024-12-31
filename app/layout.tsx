@@ -11,8 +11,9 @@ import ThemeProvider from '@/components/ThemeProvider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Next Shadcn',
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'Seattle Seawolves Admin Dashboard | Team Management',
+  description:
+    'Internal administrative dashboard for Seattle Seawolves Rugby Club staff. Manage roster, content, merchandise, and team operations.'
 };
 
 export default async function RootLayout({

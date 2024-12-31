@@ -46,7 +46,7 @@ export default function BlogPostList({ initialPosts = [] }: Props) {
   };
 
   return (
-    <Card className="border-none bg-slate-100 shadow-none">
+    <Card className="border-none  shadow-none">
       <CardContent className="p-6">
         <div className="mb-6 flex items-center justify-between">
           <div className="relative">

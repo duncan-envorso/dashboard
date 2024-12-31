@@ -144,7 +144,7 @@ const BlogEditor: React.FC<BlogEditorProps> = ({ post, goBack, teamId }) => {
   if (!editor) return null;
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6">
+    <div className="min-h-screen  p-6">
       <Card className="mx-auto w-full bg-white p-6 shadow-sm">
         <CardContent className="p-0">
           <div className="flex items-center justify-between border-b bg-white p-4">
