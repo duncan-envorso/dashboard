@@ -12,18 +12,6 @@ interface CustomJWT extends JWT {
   accessToken: string;
 }
 
-// Define the structure of your session
-interface CustomSession {
-  user: {
-    id: string;
-    email: string;
-    teamId: string;
-    team: string;
-    token: string;
-  };
-  accessToken: string;
-}
-
 export default withAuth(
   async function middleware(request: NextRequestWithAuth) {
     const token = request.nextauth?.token as CustomJWT | null;

@@ -57,6 +57,20 @@ export default function TeamRosterDashboard({
   const teamId = currentTeamConfig.teamId;
   const { data: session } = useSession();
 
+  // Helper function to convert height from cm to feet and inches
+  const convertHeightToFeetAndInches = (heightInCm: number): string => {
+    const inches = heightInCm * 0.393701;
+    const feet = Math.floor(inches / 12);
+    const inchesRemaining = Math.round(inches % 12);
+    return `${feet}'${inchesRemaining}"`;
+  };
+
+  // Helper function to convert weight from kg to lbs
+  const convertWeightToPounds = (weightInKg: number): string => {
+    const pounds = Math.round(weightInKg * 2.20462);
+    return pounds.toString();
+  };
+
   const handleAdd = () => {
     setIsAddDialogOpen(true);
   };
@@ -207,7 +221,8 @@ export default function TeamRosterDashboard({
               <div>
                 <p className="text-gray-300">Height / Weight</p>
                 <p className="font-semibold">
-                  {member.height}cm / {member.weight}kg
+                  {convertHeightToFeetAndInches(member.height)} /{' '}
+                  {convertWeightToPounds(member.weight)}lbs
                 </p>
               </div>
             </div>
@@ -219,7 +234,7 @@ export default function TeamRosterDashboard({
           className="w-full bg-primary text-primary-foreground"
           onClick={() => handleEdit(member)}
         >
-          Edit Member
+          Edit {member.name}`&apos;s Info
         </Button>
         <Button
           variant="destructive"
@@ -230,7 +245,7 @@ export default function TeamRosterDashboard({
           }}
         >
           <Trash2 className="mr-2 h-4 w-4" />
-          Delete Member
+          Delete
         </Button>
       </CardContent>
     </Card>

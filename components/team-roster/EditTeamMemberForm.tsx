@@ -12,6 +12,7 @@ import { StaffMember, RosterMember } from '@/types/team';
 import { useSession } from 'next-auth/react';
 import { toast } from '../ui/use-toast';
 import { uploadImage, upsertTeamMember } from '@/app/actions';
+import Image from 'next/image';
 
 type EditTeamMemberFormProps = {
   type: 'staff' | 'roster';
@@ -26,9 +27,10 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
   teamId,
   onSuccess
 }) => {
-  const [formData, setFormData] = useState<StaffMember | RosterMember>(
-    initialData
-  );
+  const [formData, setFormData] = useState<StaffMember | RosterMember>({
+    ...initialData,
+    bio: initialData.bio || ''
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const { data: session } = useSession();
@@ -232,9 +234,11 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
             <Label htmlFor="portrait">Portrait Image</Label>
             <div className="flex flex-col gap-4">
               {formData.portrait && (
-                <img
+                <Image
                   src={formData.portrait}
                   alt="Current portrait"
+                  height={120}
+                  width={120}
                   className="h-32 w-32 rounded-lg object-cover"
                 />
               )}
@@ -304,33 +308,90 @@ const EditTeamMemberForm: React.FC<EditTeamMemberFormProps> = ({
                   required
                 />
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="height">Height (cm)</Label>
-                  <Input
-                    id="height"
-                    name="height"
-                    type="number"
-                    value={formData.height}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  <Label htmlFor="height">Height (ft)</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="heightFt"
+                      name="heightFt"
+                      type="number"
+                      value={Math.floor(
+                        Number(formData.height || 0) / 2.54 / 12
+                      )}
+                      onChange={(e) => {
+                        const ft = parseInt(e.target.value || '0');
+                        const inches = parseInt(
+                          (
+                            document.getElementById(
+                              'heightIn'
+                            ) as HTMLInputElement
+                          )?.value || '0'
+                        );
+                        const totalInches = ft * 12 + inches;
+                        const cm = Math.floor(totalInches * 2.54);
+                        setFormData((prev) => ({
+                          ...prev,
+                          height: cm
+                        }));
+                      }}
+                      required
+                      className="w-20"
+                      min="0"
+                    />
+                    <span className="self-center">ft</span>
+                    <Input
+                      id="heightIn"
+                      name="heightIn"
+                      type="number"
+                      value={Math.round(
+                        (Number(formData.height || 0) / 2.54) % 12
+                      )}
+                      onChange={(e) => {
+                        const inches = parseInt(e.target.value || '0');
+                        const ft = parseInt(
+                          (
+                            document.getElementById(
+                              'heightFt'
+                            ) as HTMLInputElement
+                          )?.value || '0'
+                        );
+                        const totalInches = ft * 12 + inches;
+                        const cm = Math.floor(totalInches * 2.54);
+                        setFormData((prev) => ({
+                          ...prev,
+                          height: cm
+                        }));
+                      }}
+                      required
+                      className="w-20"
+                      min="0"
+                      max="11"
+                    />
+                    <span className="self-center">in</span>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Label htmlFor="weight">Weight (lbs)</Label>
                   <Input
                     id="weight"
                     name="weight"
                     type="number"
-                    value={formData.weight}
-                    onChange={handleInputChange}
+                    value={Math.round(Number(formData.weight || 0) * 2.20462)}
+                    onChange={(e) => {
+                      const lbs = parseInt(e.target.value || '0');
+                      const kg = Math.floor(lbs / 2.20462);
+                      setFormData((prev) => ({
+                        ...prev,
+                        weight: kg
+                      }));
+                    }}
                     required
+                    min="0"
                   />
                 </div>
               </div>
-
               <div className="space-y-2">
                 <Label htmlFor="hometown">Hometown</Label>
                 <Input
